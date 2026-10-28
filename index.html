@@ -723,7 +723,17 @@ function renderCards() {
     });
     box.appendChild(el);
   });
-  $("sub_cards").textContent = tracked ? `${fmt(totalLeft)} owed across ${tracked} card${tracked === 1 ? "" : "s"}` : "Add your balances to track payoff";
+  if (!BILLS.some(b => b.kind === "due")) {
+    const e = document.createElement("div"); e.className = "note";
+    e.innerHTML = 'No cards yet. Cards show up here once they\'re added as bills that are due on a day of the month. <button type="button" class="secondary" id="addcardbtn" style="display:block;margin-top:10px">Add a card</button>';
+    box.appendChild(e);
+    $("addcardbtn").addEventListener("click", () => {
+      folds.bills = false; store.set("folds", folds); editing = true; armed = null; render();
+      $("a_kind").value = "due"; $("a_daywrap").hidden = false;
+      $("addform").scrollIntoView({ block: "center" }); $("a_name").placeholder = "e.g. Discover"; $("a_name").focus();
+    });
+  }
+  $("sub_cards").textContent = tracked ? `${fmt(totalLeft)} owed across ${tracked} card${tracked === 1 ? "" : "s"}` : BILLS.some(b => b.kind === "due") ? "Add your balances to track payoff" : "No cards added yet";
 }
 
 function renderCosts() {
