@@ -14,7 +14,7 @@ It's a single `index.html` file with no build step and no dependencies.
 - **Leftover split.** A slider splits what's left between savings and spending money, with a "Goal pace" button.
 - **Spending tracker.** Log purchases and see what's left until the next payday.
 - **Card balances.** Track each card's balance as payments are ticked off.
-- **Moving fund and cost list.** Track savings toward a goal by May 1, 2027, based on real moving costs.
+- **Savings goals.** Add as many goals as you want, each with a date and a list of items (for example a move: deposit, truck; or a PC: motherboard, CPU). Each goal shows how much to save per paycheck to reach it in time, and each paycheck's savings is split across goals, soonest date first.
 - **Back up or restore.** Download everything as a file, or restore it in another browser.
 
 ## Privacy
@@ -29,7 +29,7 @@ Saved data is tied to the browser and to where the page is opened from (the file
 
 - Replacing `index.html` with a newer version in the same place keeps everything.
 - Opening it from a new location or a new website address starts empty. Use **Back up or restore** to carry data over.
-- Code changes must keep the existing storage key names (`settings4`, `bills4`, `off4`, `done2`, `pays`, `splits`, `hours`, `spends`, `balances`, `costs`, `useCosts`, `moved`, `folds`, `saved`, `sel`, `bmonth`). Renaming one makes that data look lost.
+- Code changes must keep the existing storage key names (`settings4`, `bills4`, `off4`, `done2`, `pays`, `splits`, `hours`, `spends`, `balances`, `costs`, `useCosts`, `goals`, `moved`, `folds`, `saved`, `sel`, `bmonth`). Renaming one makes that data look lost.
 
 ## Setup files
 

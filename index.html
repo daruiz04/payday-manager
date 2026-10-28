@@ -142,6 +142,10 @@ input[type=range] { width: 100%; accent-color: var(--e-save); height: 28px; }
 .setup { border: 2px solid var(--accent); }
 .setup .grid { padding-bottom: 0; }
 .small-money input[type=date] { font-variant-numeric: tabular-nums; }
+.goal { border-left-color: var(--e-save); }
+.goal .top .small-money { flex: 1 1 160px; }
+.goal .top input { font-family: var(--display); font-size: 1.1rem; }
+.goal .gtext b, .gpace b { color: var(--e-save); }
 .foot { font-size: .85rem; color: var(--muted); text-align: center; margin: 0; }
 @media (prefers-reduced-motion: reduce) { .bar i, .switch span, .switch span::after { transition: none; } }
 </style>
@@ -269,28 +273,11 @@ input[type=range] { width: 100%; accent-color: var(--e-save); height: 28px; }
   </section>
 
   <section class="panel" aria-labelledby="goallabel">
-    <h2 id="goallabel">Moving fund for May 2027</h2>
-    <div class="split">
-      <div class="tile" style="--c:var(--e-save)"><span>Moving fund total</span><b class="num" id="totalamt">$0.00</b></div>
-      <div class="tile" style="--c:var(--e-save)"><span>Moved from paychecks</span><b class="num" id="movedamt">$0.00</b></div>
-    </div>
-    <div class="goalrow">
-      <label for="saved">Savings you already had<span class="hint" style="display:block">Before the Oct 30 paycheck</span></label>
-      <div class="small-money" style="max-width:160px"><span>$</span><input id="saved" type="number" inputmode="decimal" min="0" step="1"></div>
-    </div>
-    <div class="bar" style="position:relative"><i id="projbar" style="position:absolute;left:0;top:0;bottom:0;width:0;background:var(--e-save);opacity:.3"></i><i id="goalbar" style="position:relative;background:var(--e-save);width:0"></i></div>
-    <p class="hint" style="display:flex;gap:14px;flex-wrap:wrap"><span><b style="color:var(--e-save)">■</b> Saved now</span><span><b style="color:var(--e-save);opacity:.4">■</b> Where you'll be by May 1</span></p>
-    <p class="hint num" id="goaltext"></p>
-    <div class="pace num" id="pace2"></div>
-    <p class="hint">When you move money to savings, tick "Move to savings" on that paycheck. It's added here automatically.</p>
-    <h2 style="font-size:1rem;margin-top:6px">What the move will cost</h2>
-    <p class="hint">Fill in real numbers as you find them, using your share where you split costs.</p>
-    <ul class="log cost num" id="costlist"></ul>
-    <div class="rowhead">
-      <button type="button" class="secondary" id="addcost">Add a cost</button>
-      <b class="num" id="costtotal"></b>
-    </div>
-    <label class="check"><input type="checkbox" id="usecosts"> Use this total as my moving fund goal</label>
+    <h2 id="goallabel">Savings goals</h2>
+    <p class="hint">Add a goal, list what it's for, and pick a date to have it by. Each paycheck's savings goes to your goals, soonest date first, and each goal shows what to save per paycheck to get there.</p>
+    <div class="stack" id="goals"></div>
+    <button type="button" class="secondary" id="addgoal">Add a goal</button>
+    <p class="hint num" id="generalsav" hidden></p>
   </section>
 
   <details id="settingsbox">
@@ -330,7 +317,6 @@ const DEFAULT_S = { name: "", savePct: 80, goal: 1500, rate: 0, hours: 0, localP
 const FREQS = { weekly: ["Every week", 52, 7, 4], biweekly: ["Every 2 weeks", 26, 14, 2], semimonthly: ["Twice a month (15th and last day)", 24, 0, 2], monthly: ["Once a month", 12, 0, 1] };
 const SFIELDS = [
   ["savePct", "Usual % of leftover to save", "Each paycheck starts here. You can change it per check.", "%"],
-  ["goal", "Moving fund goal", "Used when the moving cost list is empty or turned off"],
   ["rate", "Hourly pay", "Before taxes", "$"],
   ["hours", "Normal hours per paycheck", "Hours you usually work each pay period", "hrs"],
   ["freq", "How often you're paid", "", "freq"],
@@ -374,6 +360,17 @@ let useCosts = store.get("useCosts", true);
 const costTotal = () => costs.reduce((a, c) => a + (Number(c.amt) || 0), 0);
 const goal = () => useCosts && costTotal() > 0 ? costTotal() : S.goal;
 let moved = store.get("moved", {});
+// Savings goals. Each has a name, a date to have it by, money already saved, and a list of items.
+let goals = store.get("goals", null);
+if (!goals) {
+  const oldCosts = store.get("costs", null);
+  goals = [{ id: "move", name: "Moving", date: "2027-05-01", start: Math.max(parseFloat(store.get("saved", 0)) || 0, 0),
+    items: (oldCosts || DEFAULT_COSTS).map(c => ({ name: c.name, amt: Number(c.amt) || 0 })), amount: Number(S.goal) || 1500 }];
+  store.set("goals", goals);
+}
+// Older saves stored one number per paycheck; newer ones store how much went to each goal.
+Object.keys(moved).forEach(k => { if (typeof moved[k] === "number") moved[k] = { [goals[0] ? goals[0].id : "general"]: moved[k] }; });
+let armedGoal = null;
 let lastSel = null, lastMonth = null;
 let folds = store.get("folds", { check: false, bills: true }); // true = minimized
 if (folds.cards === undefined) folds.cards = false;
@@ -390,9 +387,9 @@ const FULL = ["January","February","March","April","May","June","July","August",
 const needsSetup = () => !(S.rate > 0) || !S.first;
 const PPY = (FREQS[S.freq] || FREQS.biweekly)[1];
 const PER_MONTH = (FREQS[S.freq] || FREQS.biweekly)[3];
-// Pay dates from the chosen schedule, starting at the payday given, through Jun 2027
+// Pay dates from the chosen schedule, starting at the payday given, through 2028
 const DATES = (() => {
-  const out = [], hi = new Date(2027, 5, 30);
+  const out = [], hi = new Date(2028, 11, 31);
   const f = S.freq in FREQS ? S.freq : "biweekly";
   let anchor = S.first ? new Date(S.first + "T00:00:00") : null;
   if (!anchor || isNaN(anchor)) { anchor = new Date(); anchor.setHours(0, 0, 0, 0); anchor.setDate(anchor.getDate() + ((5 - anchor.getDay() + 7) % 7)); }
@@ -417,7 +414,7 @@ const isThird = d => DATES.filter(x => x.getFullYear() === d.getFullYear() && x.
 const share = n => n === 2 ? "half" : n === 1 ? "all" : "1/" + n;
 const fundersIn = (y, m) => { const t = new Date(y, m, 1); return DATES.filter(x => x.getFullYear() === t.getFullYear() && x.getMonth() === t.getMonth() && !isThird(x)); };
 const MOVE = new Date(2027, 4, 1);
-const MONTH_LIST = []; for (let i = 0; i < 8; i++) MONTH_LIST.push(new Date(2026, 9 + i, 1));
+const MONTH_LIST = []; for (let i = 0; i < 15; i++) MONTH_LIST.push(new Date(2026, 9 + i, 1));
 const isOff = (b, mk) => !!(OFF[mk] && OFF[mk][b.id]);
 const color = b => b.kind === "rent" ? "--e-rent" : b.id === "elec" ? "--e-elec" : b.kind === "due" ? "--e-cards" : b.kind === "check" ? "--e-food" : "--e-subs";
 
@@ -490,9 +487,118 @@ function plan(d, pay) {
   return { items, note: notes.join(" "), short, cut, leftover, pct };
 }
 
+const round2 = n => Math.round(n * 100) / 100;
+const sumObj = o => Object.values(o || {}).reduce((a, v) => a + (Number(v) || 0), 0);
+const itemsTotal = g => (g.items || []).reduce((a, i) => a + (Number(i.amt) || 0), 0);
+const gTarget = g => itemsTotal(g) > 0 ? itemsTotal(g) : (Number(g.amount) || 0);
+const gDate = g => { if (!g.date) return null; const d = new Date(g.date + "T00:00:00"); return isNaN(d) ? null : d; };
+const longDate = d => MON[d.getMonth()] + " " + d.getDate() + (d.getFullYear() !== today.getFullYear() ? ", " + d.getFullYear() : "");
+const saveFor = x => (plan(x, payFor(x)).items.find(i => i.k === "save") || { amt: 0 }).amt;
+let GS = {};
+function computeGoals() {
+  GS = {};
+  goals.forEach(g => {
+    const progress = (Number(g.start) || 0) + Object.values(moved).reduce((a, m) => a + (Number((m || {})[g.id]) || 0), 0);
+    const target = gTarget(g), dt = gDate(g);
+    const n = dt ? DATES.filter(x => x >= today && x < dt && moved[key(x)] === undefined).length : 0;
+    const remaining = Math.max(target - progress, 0);
+    GS[g.id] = { progress, target, dt, checks: n, remaining, perCheck: n ? remaining / n : 0, projected: progress };
+  });
+  DATES.filter(x => x >= today && moved[key(x)] === undefined).forEach(x => {
+    Object.entries(allocate(x, saveFor(x))).forEach(([id, v]) => { const st = GS[id]; if (st && (!st.dt || x < st.dt)) st.projected += v; });
+  });
+}
+// Split one paycheck's savings across goals: each goal gets its per-paycheck amount, soonest date first.
+// Anything extra goes to the soonest goal that still needs money.
+function allocate(d, amt) {
+  const out = {}; let left = amt;
+  const act = goals.filter(g => GS[g.id] && GS[g.id].remaining > 0.004 && (!GS[g.id].dt || d < GS[g.id].dt))
+    .sort((a, b) => (GS[a.id].dt || Infinity) - (GS[b.id].dt || Infinity));
+  act.forEach(g => { if (!GS[g.id].dt) return; const v = Math.min(left, GS[g.id].perCheck); if (v > 0.004) { out[g.id] = round2(v); left -= v; } });
+  if (left > 0.004) { const id = act[0] ? act[0].id : "general"; out[id] = round2((out[id] || 0) + left); }
+  return out;
+}
+const goalName = id => id === "general" ? "General savings" : ((goals.find(g => g.id === id) || {}).name || "Savings");
+const describeAlloc = a => Object.entries(a).filter(([, v]) => v > 0.004).map(([id, v]) => `${goalName(id)} ${fmt(v)}`).join(" · ");
+
+function fillGoal(g) {
+  const el = $("goal_" + g.id); if (!el) return;
+  const st = GS[g.id]; if (!st) return;
+  const t = st.target;
+  el.querySelector(".gbar").style.width = (t > 0 ? Math.min(st.progress / t, 1) * 100 : 0) + "%";
+  el.querySelector(".gproj").style.width = (t > 0 ? Math.min(st.projected / t, 1) * 100 : 0) + "%";
+  const txt = el.querySelector(".gtext"), pace = el.querySelector(".gpace");
+  pace.hidden = false;
+  if (t <= 0) { txt.textContent = "Add items or a set amount to see what to save."; pace.hidden = true; }
+  else if (st.progress >= t) { txt.innerHTML = `<b>Reached.</b> ${fmt(st.progress)} of ${fmt(t)} saved.`; pace.hidden = true; }
+  else if (!st.dt) { txt.textContent = `${fmt(st.progress)} of ${fmt(t)} saved.`; pace.textContent = "Pick a date to see how much to save from each paycheck."; }
+  else if (!st.checks) { txt.textContent = `${fmt(st.progress)} of ${fmt(t)} saved.`; pace.textContent = `No paychecks left before ${longDate(st.dt)}. Pick a later date or save the rest another way.`; }
+  else {
+    txt.textContent = `${fmt(st.progress)} of ${fmt(t)} saved.`;
+    pace.innerHTML = `Save <b>${fmt(st.perCheck)}</b> from each of your next ${st.checks} paycheck${st.checks === 1 ? "" : "s"} to have ${fmt(t)} by ${longDate(st.dt)}. ` +
+      (st.projected + 0.5 >= t ? "At your current savings split, you'll get there." : `At your current split, you'd have about ${fmt(st.projected)}. Use "Goal pace" on each paycheck to stay on track.`);
+  }
+  const it = itemsTotal(g);
+  el.querySelector(".gtotal").textContent = it > 0 ? "Total: " + fmt(it) : "";
+  el.querySelector(".gamtwrap").hidden = it > 0;
+}
+
+function renderGoals(force) {
+  const box = $("goals");
+  if (!force && box.contains(document.activeElement)) { goals.forEach(fillGoal); return; }
+  box.innerHTML = "";
+  if (!goals.length) box.innerHTML = '<div class="note">No goals yet. Tap "Add a goal" to start one.</div>';
+  goals.forEach(g => {
+    const el = document.createElement("div"); el.className = "card goal"; el.id = "goal_" + g.id;
+    el.innerHTML = `<div class="top"><span class="small-money"><input type="text" class="gname" aria-label="Goal name" placeholder="Goal name"></span>
+        <button type="button" class="secondary danger grm${armedGoal === g.id ? " armed" : ""}">${armedGoal === g.id ? "Tap again to remove" : "Remove"}</button></div>
+      <div class="inputs">
+        <label>Have it by<span class="small-money"><input type="date" class="gdate"></span></label>
+        <label>Already saved<span class="small-money">$<input type="number" inputmode="decimal" min="0" step="0.01" class="gstart" placeholder="0.00"></span></label>
+      </div>
+      <div class="bar" style="position:relative"><i class="gproj" style="position:absolute;left:0;top:0;bottom:0;width:0;background:var(--e-save);opacity:.3"></i><i class="gbar" style="position:relative;background:var(--e-save);width:0"></i></div>
+      <p class="hint" style="display:flex;gap:14px;flex-wrap:wrap;margin:0"><span><b style="color:var(--e-save)">■</b> Saved</span><span><b style="color:var(--e-save);opacity:.4">■</b> Where you'll be by the date</span></p>
+      <div class="hint num gtext"></div>
+      <div class="pace num gpace"></div>
+      <ul class="log cost num gitems"></ul>
+      <div class="rowhead"><button type="button" class="secondary gadd">Add an item</button><b class="num gtotal"></b></div>
+      <label class="gamtwrap" style="font-size:.85rem;color:var(--muted);display:flex;flex-direction:column;gap:4px">Or a set amount, if you don't want a list<span class="small-money" style="max-width:160px">$<input type="number" inputmode="decimal" min="0" step="0.01" class="gamt" placeholder="0.00"></span></label>`;
+    const nm = el.querySelector(".gname"), dt = el.querySelector(".gdate"), stt = el.querySelector(".gstart"), am = el.querySelector(".gamt");
+    nm.value = g.name || ""; dt.value = g.date || ""; stt.value = g.start || ""; am.value = g.amount || "";
+    nm.addEventListener("input", () => { g.name = nm.value; store.set("goals", goals); });
+    dt.addEventListener("change", () => { g.date = dt.value; store.set("goals", goals); render(); });
+    stt.addEventListener("input", () => { g.start = Math.max(parseFloat(stt.value) || 0, 0); store.set("goals", goals); render(); });
+    am.addEventListener("input", () => { g.amount = Math.max(parseFloat(am.value) || 0, 0); store.set("goals", goals); render(); });
+    el.querySelector(".grm").addEventListener("click", () => {
+      if (armedGoal === g.id) { goals = goals.filter(x => x !== g); armedGoal = null; store.set("goals", goals); renderGoals(true); render(); }
+      else { armedGoal = g.id; renderGoals(true); }
+    });
+    const ul = el.querySelector(".gitems");
+    (g.items || []).forEach(i => {
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="small-money"><input type="text" aria-label="Item" placeholder="What is it?"></span><span class="small-money">$<input type="number" inputmode="decimal" min="0" step="0.01" aria-label="Cost" placeholder="0.00"></span><button type="button" class="xbtn" aria-label="Remove item">×</button>`;
+      const [inm, iam] = li.querySelectorAll("input");
+      inm.value = i.name || ""; iam.value = i.amt || "";
+      inm.addEventListener("input", () => { i.name = inm.value; store.set("goals", goals); });
+      iam.addEventListener("input", () => { i.amt = Math.max(parseFloat(iam.value) || 0, 0); store.set("goals", goals); render(); });
+      li.querySelector("button").addEventListener("click", () => { g.items = g.items.filter(x => x !== i); store.set("goals", goals); renderGoals(true); render(); });
+      ul.appendChild(li);
+    });
+    el.querySelector(".gadd").addEventListener("click", () => {
+      (g.items = g.items || []).push({ name: "", amt: 0 }); store.set("goals", goals); renderGoals(true); render();
+      const ins = $("goal_" + g.id).querySelectorAll('.gitems input[type="text"]'); if (ins.length) ins[ins.length - 1].focus();
+    });
+    box.appendChild(el);
+  });
+  goals.forEach(fillGoal);
+  const gen = Object.values(moved).reduce((a, m) => a + (Number((m || {}).general) || 0), 0);
+  $("generalsav").hidden = gen <= 0.004;
+  $("generalsav").textContent = `General savings (not tied to a goal): ${fmt(gen)}`;
+}
+
 function renderDates() {
   const box = $("dates"); const keep = box.scrollLeft; box.innerHTML = "";
-  DATES.filter(d => d < MOVE || key(d) === sel).forEach(d => {
+  DATES.forEach(d => {
     const k = key(d), b = document.createElement("button");
     b.type = "button"; b.setAttribute("aria-pressed", k === sel);
     const live = plan(d, payFor(d)).items.filter(i => i.amt > 0.004);
@@ -603,8 +709,11 @@ function render() {
   $("note").hidden = !p.note; $("note").textContent = p.note;
   $("splitlabel").textContent = label(d) + " paycheck: bills to pay";
   const dk = done[k] || (done[k] = {});
+  computeGoals();
   { const sv = p.items.find(i => i.k === "save").amt;
-    if (moved[k] !== undefined && Math.abs(moved[k] - sv) > 0.004) { moved[k] = sv; store.set("moved", moved); } }
+    if (moved[k] !== undefined && Math.abs(sumObj(moved[k]) - sv) > 0.004) { delete moved[k]; computeGoals(); moved[k] = allocate(d, sv); store.set("moved", moved); computeGoals(); } }
+  const alloc = moved[k] !== undefined ? moved[k] : allocate(d, p.items.find(i => i.k === "save").amt);
+  { const si = p.items.find(i => i.k === "save"); const ds = describeAlloc(alloc); if (ds) si.how = "Do this first. " + ds + "."; }
   { const bi = billItems(p), dn = bi.filter(i => dk[i.k]).length, tot = bi.reduce((a, b) => a + b.amt, 0);
     $("sub_check").textContent = bi.length && dn === bi.length ? `All ${bi.length} paid ✓ · ${fmt(tot)}` : `${fmt(tot)} · ${dn} of ${bi.length} paid`; }
   const env = $("env"); env.innerHTML = ""; $("env2").innerHTML = "";
@@ -619,7 +728,7 @@ function render() {
     li.querySelector(".how").textContent = it.how;
     const toggle = () => {
       dk[it.k] = !dk[it.k]; store.set("done2", done);
-      if (it.k === "save") { if (dk[it.k]) moved[k] = it.amt; else delete moved[k]; store.set("moved", moved); }
+      if (it.k === "save") { if (dk[it.k]) moved[k] = alloc; else delete moved[k]; store.set("moved", moved); }
       const bi = billItems(p);
       if (dk[it.k] && bi.some(b => b.k === it.k) && bi.every(b => dk[b.k])) { folds.check = true; store.set("folds", folds); }
       render();
@@ -643,36 +752,26 @@ function render() {
   else { const dn = live.filter(i => dk[i.k]).length;
     st.className = "ok"; st.textContent = dn === live.length ? "All done for this paycheck. Nice work." : `${dn} of ${live.length} done.`; }
 
-  const start = Math.max(parseFloat($("saved").value) || 0, 0);
-  const fromChecks = Object.values(moved).reduce((a, v) => a + (Number(v) || 0), 0);
-  const saved = start + fromChecks;
-  $("movedamt").textContent = fmt(fromChecks); $("totalamt").textContent = fmt(saved);
-  const coming = DATES.filter(x => x >= today && x < MOVE && moved[key(x)] === undefined)
-    .reduce((a, x) => a + (plan(x, payFor(x)).items.find(i => i.k === "save") || { amt: 0 }).amt, 0);
-  const proj = saved + coming;
-  const rest = DATES.filter(x => x >= today && x < MOVE && moved[key(x)] === undefined).map(x => plan(x, payFor(x))).filter(q => q.leftover > 0);
-  const G = goal();
-  const need = Math.max(G - saved, 0), restLeft = rest.reduce((a, q) => a + q.leftover, 0);
-  const perCheck = rest.length ? need / rest.length : 0;
-  const pacePct = restLeft > 0 ? Math.min(100, Math.ceil(need / restLeft * 100 / 5) * 5) : 100;
-  $("pacebtn").dataset.p = pacePct; $("pacebtn").textContent = `Goal pace (${pacePct}%)`;
-  $("pacebtn").setAttribute("aria-pressed", p.pct === pacePct);
-  const paceTxt = need <= 0 ? `You've already reached your ${fmt(G)} goal.`
-    : `To have ${fmt(G)} by May 1, save about <b>${fmt(perCheck)}</b> from each of your next ${rest.length} paychecks. Some checks have more left over than others, so saving <b>${pacePct}%</b> of every leftover gets you there.`;
-  $("pace2").innerHTML = paceTxt;
-  $("pace").innerHTML = need <= 0 ? paceTxt : p.leftover <= 0 ? `Goal pace is about <b>${fmt(perCheck)}</b> per paycheck. This one has nothing left over, so the others will make up for it.`
-    : sv + 0.004 >= perCheck ? `Goal pace is about <b>${fmt(perCheck)}</b> per paycheck. You're saving ${fmt(sv)} from this one, so you're ahead.`
-    : `Goal pace is about <b>${fmt(perCheck)}</b> per paycheck. This one saves ${fmt(sv)}. Tap "Goal pace" to save ${pacePct}% of every leftover and stay on track.`;
-  $("goalbar").style.width = (G > 0 ? Math.min(saved / G, 1) * 100 : 0) + "%";
-  $("projbar").style.width = (G > 0 ? Math.min(proj / G, 1) * 100 : 0) + "%";
-  $("goaltext").textContent = `${fmt(saved)} saved so far. If you stick to the plan, you'll have about ${fmt(proj)} by May 1` +
-    (proj >= G ? `, which beats your ${fmt(G)} goal.` : `, ${fmt(G - proj)} short of your ${fmt(G)} goal.`);
+  { // How much this paycheck needs for your goals
+    const active = goals.filter(g => GS[g.id] && GS[g.id].dt && d < GS[g.id].dt && GS[g.id].remaining > 0.004);
+    const needHere = moved[k] === undefined ? active.reduce((a, g) => a + GS[g.id].perCheck, 0) : 0;
+    const pacePct = p.leftover > 0 ? Math.min(100, Math.ceil(needHere / p.leftover * 100 / 5) * 5) : 100;
+    $("pacebtn").dataset.p = pacePct; $("pacebtn").textContent = `Goal pace (${pacePct}%)`;
+    $("pacebtn").hidden = !needHere;
+    $("pacebtn").setAttribute("aria-pressed", !!needHere && p.pct === pacePct);
+    const list = active.map(g => `${g.name || "Goal"} ${fmt(GS[g.id].perCheck)}`).join(", ");
+    $("pace").innerHTML = !goals.length ? "Add a savings goal below to see how much to save from each paycheck."
+      : moved[k] !== undefined ? `Saved from this paycheck: ${describeAlloc(moved[k]) || fmt(0)}.`
+      : !needHere ? "Your goals don't need anything from this paycheck. Anything you save goes to your next goal."
+      : p.leftover <= 0 ? `Your goals need <b>${fmt(needHere)}</b> per paycheck (${list}). This one has nothing left over, so later checks will have to make up for it.`
+      : sv + 0.004 >= needHere ? `Your goals need <b>${fmt(needHere)}</b> from this paycheck (${list}). You're saving ${fmt(sv)}, so you're on track.`
+      : `Your goals need <b>${fmt(needHere)}</b> from this paycheck (${list}). You're saving ${fmt(sv)}. Tap "Goal pace" to save ${pacePct}% and stay on track.`;
+  }
   renderDates();
   renderBills();
   renderSpending(d, p);
   renderCards();
-  $("costtotal").textContent = "Total: " + fmt(costTotal());
-  $("usecosts").checked = useCosts;
+  renderGoals();
   applyFolds();
 }
 
@@ -738,12 +837,12 @@ function renderCards() {
     bal.addEventListener("change", () => {
       const v = bal.value === "" ? undefined : Math.max(parseFloat(bal.value) || 0, 0);
       if (v === undefined) delete balances[b.id]; else balances[b.id] = { start: v, asOf: key(today), extras: [] };
-      store.set("balances", balances); bal.blur(); render();
+      store.set("balances", balances); setTimeout(render, 0);
     });
     ext.addEventListener("change", () => {
       const v = Math.max(parseFloat(ext.value) || 0, 0);
       if (v > 0 && has) { info.extras = (info.extras || []).concat([{ amt: v, date: key(today) }]); balances[b.id] = info; store.set("balances", balances); }
-      ext.value = ""; ext.blur(); render();
+      ext.value = ""; setTimeout(render, 0);
     });
     box.appendChild(el);
   });
@@ -760,20 +859,6 @@ function renderCards() {
   $("sub_cards").textContent = tracked ? `${fmt(totalLeft)} owed across ${tracked} card${tracked === 1 ? "" : "s"}` : BILLS.some(isCard) ? "Add your balances to track payoff" : "No cards added yet";
 }
 
-function renderCosts() {
-  const ul = $("costlist"); ul.innerHTML = "";
-  costs.forEach(c => {
-    const li = document.createElement("li");
-    li.innerHTML = `<span class="small-money"><input type="text" aria-label="Cost name"></span><span class="small-money">$<input type="number" inputmode="decimal" min="0" step="0.01" aria-label="Amount"></span><button type="button" class="xbtn" aria-label="Remove">×</button>`;
-    const [nm, am] = li.querySelectorAll("input");
-    nm.value = c.name; am.value = c.amt || "";
-    am.placeholder = "0.00";
-    nm.addEventListener("change", () => { c.name = nm.value; store.set("costs", costs); });
-    am.addEventListener("input", () => { c.amt = Math.max(parseFloat(am.value) || 0, 0); store.set("costs", costs); render(); });
-    li.querySelector("button").addEventListener("click", () => { costs = costs.filter(x => x !== c); store.set("costs", costs); renderCosts(); render(); });
-    ul.appendChild(li);
-  });
-}
 
 function fieldFor(k, idp) {
   const [, lab, sub, unit] = SFIELDS.find(f => f[0] === k);
@@ -904,17 +989,19 @@ $("spendform").addEventListener("submit", e => {
   $("sp_what").value = ""; $("sp_amt").value = "";
   render();
 });
-$("addcost").addEventListener("click", () => { costs.push({ id: "c" + Date.now(), name: "New cost", amt: 0 }); store.set("costs", costs); renderCosts(); render();
-  const ins = $("costlist").querySelectorAll('input[type="text"]'); if (ins.length) { ins[ins.length - 1].select(); } });
-$("usecosts").addEventListener("change", () => { useCosts = $("usecosts").checked; store.set("useCosts", useCosts); render(); });
+$("addgoal").addEventListener("click", () => {
+  const d = new Date(today); d.setMonth(d.getMonth() + 3);
+  const g = { id: "g" + Date.now(), name: "", date: key(d), start: 0, items: [{ name: "", amt: 0 }], amount: 0 };
+  goals.push(g); store.set("goals", goals); renderGoals(true); render();
+  const el = $("goal_" + g.id); el.scrollIntoView({ block: "center" }); el.querySelector(".gname").focus();
+});
+$("goals").addEventListener("focusout", e => { if (!$("goals").contains(e.relatedTarget)) setTimeout(render, 0); });
+$("cards").addEventListener("focusout", e => { if (!$("cards").contains(e.relatedTarget)) setTimeout(render, 0); });
 $("editbtn").addEventListener("click", () => { editing = !editing; armed = null; renderBills(); });
-$("saved").value = store.get("saved", 0);
 $("pay").addEventListener("input", () => { pays[sel] = $("pay").value; store.set("pays", pays); render(); });
-$("saved").addEventListener("input", () => { store.set("saved", $("saved").value); render(); });
 renderTitle();
 buildSetup();
 buildSettings();
-renderCosts();
 render();
 </script>
 </body>
