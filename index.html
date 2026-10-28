@@ -241,7 +241,11 @@ input[type=range] { width: 100%; accent-color: var(--e-save); height: 28px; }
     <form class="addform" id="addform" hidden>
       <h2 class="full" style="font-size:1rem">Add a bill</h2>
       <label class="full">Name<span class="small-money"><input id="a_name" type="text" placeholder="e.g. Phone bill" required></span></label>
-      <label>Amount<span class="small-money">$<input id="a_amt" type="number" inputmode="decimal" min="0" step="0.01" required></span></label>
+      <label>Full bill amount<span class="small-money">$<input id="a_amt" type="number" inputmode="decimal" min="0" step="0.01" required></span></label>
+      <label>Who pays it<span class="small-money"><select id="a_share">
+        <option value="100">I pay all of it</option>
+        <option value="50">Split in half</option>
+      </select></span></label>
       <label>How it's paid<span class="small-money"><select id="a_kind">
         <option value="due">Due on a day</option>
         <option value="split">Monthly, split across checks</option>
@@ -316,8 +320,8 @@ const raw = {
 };
 const PREFIX = "payday.";
 const DEFAULT_BILLS = [
-  { id: "rent", name: "Rent", amt: 0, kind: "rent", info: "Your share" },
-  { id: "elec", name: "Electric", amt: 0, kind: "split", info: "Your share" },
+  { id: "rent", name: "Rent", amt: 0, kind: "rent", share: 50 },
+  { id: "elec", name: "Electric", amt: 0, kind: "split", share: 50 },
   { id: "food", name: "Groceries", amt: 0, kind: "check", info: "Food until the next check" }
 ];
 const DEFAULT_OFF = {};
@@ -339,6 +343,13 @@ const store = {
   set(k, v) { raw.set(PREFIX + k, v); }
 };
 let BILLS = store.get("bills4", JSON.parse(JSON.stringify(DEFAULT_BILLS)));
+// A bill's amount is the full bill; "share" is the percent you pay (100 = all of it, 50 = split in half)
+const mine = b => (Number(b.amt) || 0) * ((b.share === undefined ? 100 : Number(b.share)) / 100);
+// Older saved bills stored only your half, marked "Your half". Convert them to full bill + 50% share.
+if (BILLS.some(b => b.share === undefined && /^Your half/.test(b.info || ""))) {
+  BILLS.forEach(b => { if (b.share === undefined && /^Your half/.test(b.info || "")) { b.amt = Math.round(b.amt * 2 * 100) / 100; b.share = 50; b.info = ""; } });
+  store.set("bills4", BILLS);
+}
 let OFF = store.get("off4", JSON.parse(JSON.stringify(DEFAULT_OFF)));
 let S = Object.assign({}, DEFAULT_S, store.get("settings4", {}));
 let done = store.get("done2", {});
@@ -445,20 +456,20 @@ function plan(d, pay) {
       const due = new Date(y, m + 1, 1);
       if (isOff(b, mkey(y, m + 1))) return;
       const n = fundersIn(y, m).length || 1;
-      fixed.push({ k: b.id, what: FULL[due.getMonth()] + " " + b.name.charAt(0).toLowerCase() + b.name.slice(1), how: n > 1 ? `${share(n)[0].toUpperCase() + share(n).slice(1)} of it. Move to savings so it's ready on the 1st.` : "All of it. This is the only check before it's due on the 1st.", amt: b.amt / n, c });
+      fixed.push({ k: b.id, what: FULL[due.getMonth()] + " " + b.name.charAt(0).toLowerCase() + b.name.slice(1), how: (n > 1 ? `${share(n)[0].toUpperCase() + share(n).slice(1)} of your ${fmt(mine(b))}${mine(b) < b.amt ? " share" : ""}. Move to savings so it's ready on the 1st.` : `All of your ${fmt(mine(b))}${mine(b) < b.amt ? " share" : ""}. This is the only check before it's due on the 1st.`), amt: mine(b) / n, c });
       if (n === 1) notes.push(`Your full ${FULL[due.getMonth()]} rent comes out of this check.`);
     } else if (b.kind === "split") {
       if (third || isOff(b, mkey(y, m))) return;
       const n = fundersIn(y, m).length || 1;
-      fixed.push({ k: b.id, what: b.name + (n > 1 ? ` (${share(n)})` : ""), how: (n > 1 ? `${share(n)[0].toUpperCase() + share(n).slice(1)} of ${FULL[m]}'s bill.` : FULL[m] + "'s bill.") + (b.id === "elec" ? " Set it aside until the bill comes." : " Leave in checking for auto-pay."), amt: b.amt / n, c });
+      fixed.push({ k: b.id, what: b.name + (n > 1 ? ` (${share(n)})` : ""), how: (n > 1 ? `${share(n)[0].toUpperCase() + share(n).slice(1)} of your ${fmt(mine(b))}${mine(b) < b.amt ? " share" : ""} for ${FULL[m]}.` : `Your ${fmt(mine(b))}${mine(b) < b.amt ? " share" : ""} for ${FULL[m]}.`) + (b.id === "elec" ? " Set it aside until the bill comes." : " Leave in checking for auto-pay."), amt: mine(b) / n, c });
     } else if (b.kind === "due") {
       for (let o = -1; o <= 1; o++) {
         const due = new Date(y, m + o, Math.min(b.day, new Date(y, m + o + 1, 0).getDate()));
         if (due >= d && due < next && !isOff(b, mkey(due.getFullYear(), due.getMonth())))
-          fixed.push({ k: b.id + "-" + key(due), what: "Pay " + b.name, how: "Due " + label(due) + ". Pay it now.", amt: b.amt, c });
+          fixed.push({ k: b.id + "-" + key(due), what: "Pay " + b.name, how: "Due " + label(due) + ". Pay it now.", amt: mine(b), c });
       }
     } else if (b.kind === "check") {
-      if (!isOff(b, mkey(y, m))) flex.push({ k: b.id, what: b.name, how: "Until your next paycheck.", amt: b.amt, want: b.amt, c });
+      if (!isOff(b, mkey(y, m))) flex.push({ k: b.id, what: b.name, how: "Until your next paycheck.", amt: mine(b), want: mine(b), c });
     }
   });
   const fixedSum = fixed.reduce((a, x) => a + x.amt, 0);
@@ -527,9 +538,10 @@ function renderBills() {
     const id = "sw_" + b.id;
     li.innerHTML = `<label class="switch"><input type="checkbox" id="${id}" ${on ? "checked" : ""}><span></span></label>
       <div style="min-width:0"><label class="bname" for="${id}"><i class="dot"></i><span></span></label><div class="bdet"></div></div>
-      <div class="bamt num">${fmt(b.amt)}<div class="bdet">${b.kind === "check" ? "per check" : "per month"}</div></div>`;
+      <div class="bamt num">${fmt(mine(b))}<div class="bdet">${b.kind === "check" ? "per check" : "per month"}</div></div>`;
     li.querySelector(".bname span").textContent = b.name;
-    li.querySelector(".bdet").textContent = billDetail(b, y, m);
+    const sh = b.share === undefined ? 100 : Number(b.share);
+    li.querySelector(".bdet").textContent = (sh < 100 ? `Your ${sh === 50 ? "half" : sh + "%"} of ${fmt(b.amt)}. ` : "") + billDetail(b, y, m);
     li.querySelector("input").addEventListener("change", e => {
       OFF[bmonth] = OFF[bmonth] || {};
       if (e.target.checked) delete OFF[bmonth][b.id]; else OFF[bmonth][b.id] = true;
@@ -537,11 +549,17 @@ function renderBills() {
     });
     if (editing) {
       const er = document.createElement("div"); er.className = "editrow";
-      er.innerHTML = `<span class="small-money">$<input type="number" inputmode="decimal" min="0" step="0.01" id="amt_${b.id}"></span>` +
+      const shv = b.share === undefined ? 100 : Number(b.share);
+      er.innerHTML = `<span class="small-money" title="Full bill">$<input type="number" inputmode="decimal" min="0" step="0.01" id="amt_${b.id}"></span>` +
+        `<span class="small-money" style="width:auto"><select id="share_${b.id}" aria-label="${b.name} split">` +
+        `<option value="100">I pay all of it</option><option value="50">Split in half</option>` +
+        (shv !== 100 && shv !== 50 ? `<option value="${shv}">I pay ${shv}%</option>` : "") + `</select></span>` +
         (b.kind === "due" ? `<span class="small-money">Day<input type="number" inputmode="numeric" min="1" max="31" step="1" id="day_${b.id}"></span>` : "") +
         `<button type="button" class="secondary danger${armed === b.id ? " armed" : ""}">${armed === b.id ? "Tap again to remove" : "Remove"}</button>`;
       const ins = er.querySelectorAll("input");
-      ins[0].value = b.amt; ins[0].setAttribute("aria-label", b.name + " amount");
+      ins[0].value = b.amt; ins[0].setAttribute("aria-label", b.name + " full bill amount");
+      const shs = er.querySelector("select"); shs.value = String(shv);
+      shs.addEventListener("change", () => { b.share = Number(shs.value); store.set("bills4", BILLS); render(); });
       ins[0].addEventListener("change", () => { b.amt = Math.max(parseFloat(ins[0].value) || 0, 0); store.set("bills4", BILLS); render(); });
       if (ins[1]) { ins[1].value = b.day; ins[1].setAttribute("aria-label", b.name + " due day"); ins[1].addEventListener("change", () => { b.day = Math.min(Math.max(Math.round(parseFloat(ins[1].value)) || 1, 1), 31); store.set("bills4", BILLS); render(); }); }
       er.querySelector("button").addEventListener("click", () => {
@@ -552,7 +570,7 @@ function renderBills() {
     }
     ul.appendChild(li);
   });
-  const sum = BILLS.filter(b => !isOff(b, bmonth) && b.kind !== "check").reduce((a, b) => a + b.amt, 0);
+  const sum = BILLS.filter(b => !isOff(b, bmonth) && b.kind !== "check").reduce((a, b) => a + mine(b), 0);
   const li = document.createElement("li");
   li.innerHTML = `<span></span><div><b>${FULL[m]} bills</b><div class="bdet">Not counting groceries</div></div><div class="bamt num"><b>${fmt(sum)}</b></div>`;
   ul.appendChild(li);
@@ -681,7 +699,7 @@ function renderSpending(d, p) {
 function cardPaid(b, info) {
   let paid = 0;
   Object.values(done).forEach(dk => Object.keys(dk).forEach(ik => {
-    if (dk[ik] && ik.startsWith(b.id + "-") && ik.slice(b.id.length + 1) >= info.asOf) paid += b.amt;
+    if (dk[ik] && ik.startsWith(b.id + "-") && ik.slice(b.id.length + 1) >= info.asOf) paid += mine(b);
   }));
   return paid + (info.extras || []).reduce((a, e) => a + e.amt, 0);
 }
@@ -705,10 +723,10 @@ function renderCards() {
         <label>Extra payment<span class="small-money">$<input type="number" inputmode="decimal" min="0" step="0.01" id="ext_${b.id}" placeholder="0.00"></span></label>
       </div>`;
     el.querySelector(".nm").textContent = b.name;
-    const months = b.amt > 0 ? Math.ceil(left / b.amt) : 0;
+    const months = mine(b) > 0 ? Math.ceil(left / mine(b)) : 0;
     el.querySelector(".hint").textContent = !has ? `Type the balance from your last ${b.name} statement to start tracking.`
       : left <= 0 ? "Paid off. Nice work."
-      : `${fmt(paid)} paid since ${label(new Date(info.asOf + "T00:00:00"))}. At ${fmt(b.amt)} a month, about ${months} more month${months === 1 ? "" : "s"}, not counting interest.`;
+      : `${fmt(paid)} paid since ${label(new Date(info.asOf + "T00:00:00"))}. At ${fmt(mine(b))} a month, about ${months} more month${months === 1 ? "" : "s"}, not counting interest.`;
     const bal = el.querySelector("#bal_" + b.id), ext = el.querySelector("#ext_" + b.id);
     if (has) bal.value = info.start;
     bal.addEventListener("change", () => {
@@ -831,12 +849,12 @@ $("addform").addEventListener("submit", e => {
   e.preventDefault();
   const name = $("a_name").value.trim(), amt = Math.max(parseFloat($("a_amt").value) || 0, 0);
   if (!name) return;
-  const b = { id: "c" + Date.now(), name, amt, kind: $("a_kind").value };
+  const b = { id: "c" + Date.now(), name, amt, kind: $("a_kind").value, share: Number($("a_share").value) };
   if (b.kind === "due") b.day = Math.min(Math.max(Math.round(parseFloat($("a_day").value)) || 1, 1), 31);
   const fi = BILLS.findIndex(x => x.kind === "check");
   if (fi >= 0) BILLS.splice(fi, 0, b); else BILLS.push(b);
   store.set("bills4", BILLS);
-  $("a_name").value = ""; $("a_amt").value = "";
+  $("a_name").value = ""; $("a_amt").value = ""; $("a_share").value = "100";
   render();
 });
 const setSplit = v => { splits[sel] = Math.min(Math.max(Math.round(v), 0), 100); store.set("splits", splits); render(); };
