@@ -1,714 +1,921 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fall 2026 — Course Binder</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Payday Splitter</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap">
 <style>
-  :root{
-    --ink:#171B24;
-    --ink-soft:#232838;
-    --paper:#F6F1E5;
-    --paper-dim:#ECE5D3;
-    --text-on-paper:#241F18;
-    --text-muted:#6B6250;
-    --rule:#D9CFB8;
-
-    --bsw:#A6636D;
-    --bsw-soft:#EFDDDF;
-    --comm304:#C0812E;
-    --comm304-soft:#F3E2C4;
-    --comm360:#3E7C6B;
-    --comm360-soft:#DAEAE3;
-    --cse496:#4A6FA5;
-    --cse496-soft:#DCE5F2;
-    --cse545:#8656A6;
-    --cse545-soft:#E7DCEF;
-    --cse564:#B0483F;
-    --cse564-soft:#F2DAD6;
-
-    --online:#3E7C6B;
-    --online-soft:#DAEAE3;
-    --inperson:#B0483F;
-    --inperson-soft:#F2DAD6;
-  }
-
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
-    background:var(--ink);
-    font-family:'Inter',sans-serif;
-    color:var(--paper);
-    min-height:100vh;
-  }
-
-  .wrap{max-width:980px;margin:0 auto;padding:36px 20px 80px;}
-
-  /* ---------- header ---------- */
-  header{
-    display:flex;
-    flex-wrap:wrap;
-    align-items:flex-end;
-    justify-content:space-between;
-    gap:20px;
-    padding-bottom:28px;
-    border-bottom:1px solid rgba(246,241,229,0.14);
-    margin-bottom:6px;
-  }
-  .eyebrow{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    letter-spacing:0.14em;
-    text-transform:uppercase;
-    color:#9C9484;
-    margin:0 0 8px;
-  }
-  h1{
-    font-family:'Fraunces',serif;
-    font-weight:700;
-    font-size:clamp(32px,5vw,46px);
-    line-height:1.05;
-    margin:0;
-    letter-spacing:-0.01em;
-  }
-  h1 em{font-style:italic;font-weight:500;color:var(--comm304);}
-  .countdown{
-    text-align:right;
-    font-family:'IBM Plex Mono',monospace;
-  }
-  .countdown .num{
-    font-size:40px;
-    font-weight:600;
-    color:#F0E4B8;
-    line-height:1;
-  }
-  .countdown .label{
-    font-size:11px;
-    letter-spacing:0.08em;
-    text-transform:uppercase;
-    color:#9C9484;
-    margin-top:4px;
-  }
-  .subhead{
-    font-size:14.5px;
-    color:#B7AF9E;
-    max-width:560px;
-    margin-top:12px;
-    line-height:1.55;
-  }
-
-  /* ---------- tab nav ---------- */
-  .tabs{
-    display:flex;
-    gap:6px;
-    margin-top:26px;
-    flex-wrap:wrap;
-  }
-  .tab{
-    position:relative;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12px;
-    letter-spacing:0.03em;
-    background:var(--ink-soft);
-    color:#B7AF9E;
-    border:none;
-    padding:12px 16px 10px;
-    cursor:pointer;
-    clip-path:polygon(10px 0,100% 0,100% 100%,10px 100%,0 60%,0 40%);
-    border-top:3px solid transparent;
-    transition:background .15s ease, color .15s ease;
-    text-align:left;
-    line-height:1.3;
-  }
-  .tab .code{display:flex;align-items:center;gap:6px;font-weight:600;font-size:12.5px;}
-  .tab .name{display:block;font-size:10.5px;color:#847C6C;margin-top:2px;text-transform:uppercase;letter-spacing:.05em;}
-  .tab:hover{background:#2B3142;color:var(--paper);}
-  .mode-dot{
-    display:inline-block;
-    width:6px;height:6px;
-    border-radius:50%;
-    background:var(--online);
-    flex-shrink:0;
-  }
-  .tab[data-mode="in-person"] .mode-dot{background:var(--inperson);}
-  .tab.active{
-    background:var(--paper);
-    color:var(--text-on-paper);
-  }
-  .tab.active .name{color:var(--text-muted);}
-
-  /* per-course tab accent when active */
-  .tab.active[data-course="bsw336"]{border-top-color:var(--bsw);}
-  .tab.active[data-course="comm304"]{border-top-color:var(--comm304);}
-  .tab.active[data-course="comm360"]{border-top-color:var(--comm360);}
-  .tab.active[data-course="cse496"]{border-top-color:var(--cse496);}
-  .tab.active[data-course="cse545"]{border-top-color:var(--cse545);}
-  .tab.active[data-course="cse564"]{border-top-color:var(--cse564);}
-
-  .legend{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:10.5px;
-    color:#847C6C;
-    margin:10px 2px 0;
-    display:flex;
-    align-items:center;
-    gap:6px;
-  }
-  .legend .mode-dot{margin-left:10px;}
-  .legend .mode-dot:first-child{margin-left:0;}
-
-  /* ---------- page (paper card) ---------- */
-  .page{
-    background:var(--paper);
-    color:var(--text-on-paper);
-    padding:36px 38px 40px;
-    display:none;
-  }
-  .page.active{display:block;}
-  .page[data-mode="in-person"]{border-top:3px solid var(--inperson);}
-
-  .page-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:20px;
-    flex-wrap:wrap;
-    padding-bottom:22px;
-    border-bottom:1px solid var(--rule);
-    margin-bottom:26px;
-  }
-  .stamp{
-    display:inline-block;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12px;
-    font-weight:600;
-    letter-spacing:.06em;
-    padding:5px 10px;
-    border-radius:2px;
-    margin-bottom:10px;
-  }
-  .page-head h2{
-    font-family:'Fraunces',serif;
-    font-size:28px;
-    font-weight:700;
-    margin:0 0 6px;
-    letter-spacing:-0.01em;
-  }
-  .meta-line{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:12px;
-    color:var(--text-muted);
-  }
-  .desc{
-    font-size:15px;
-    line-height:1.65;
-    color:#3B3527;
-    max-width:640px;
-  }
-
-  .badge{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    border:1px solid var(--rule);
-    padding:8px 12px;
-    border-radius:3px;
-    color:var(--text-muted);
-    white-space:nowrap;
-  }
-
-  .mode-pill{
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    font-weight:600;
-    letter-spacing:.04em;
-    text-transform:uppercase;
-    padding:5px 10px;
-    border-radius:2px;
-    margin:0 0 10px 8px;
-  }
-  .mode-pill.online{background:var(--online-soft);color:var(--online);}
-  .mode-pill.in-person{background:var(--inperson-soft);color:var(--inperson);}
-
-  .logistics{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin-top:16px;
-  }
-  .logistics .item{
-    display:flex;
-    flex-direction:column;
-    gap:2px;
-    background:var(--paper-dim);
-    border-radius:3px;
-    padding:8px 12px;
-    min-width:120px;
-  }
-  .logistics .item .k{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:9.5px;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    color:var(--text-muted);
-  }
-  .logistics .item .v{
-    font-size:12.5px;
-    font-weight:600;
-    color:var(--text-on-paper);
-  }
-  .logistics .item .v.check::after{
-    content:" ✓";
-    color:var(--online);
-  }
-
-  .cols{
-    display:grid;
-    grid-template-columns:1.15fr 1fr;
-    gap:38px;
-  }
-  @media (max-width:720px){ .cols{grid-template-columns:1fr;} }
-
-  h3.section-title{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    letter-spacing:.1em;
-    text-transform:uppercase;
-    color:var(--text-muted);
-    margin:0 0 14px;
-    display:flex;
-    align-items:center;
-    gap:8px;
-  }
-  h3.section-title::after{
-    content:"";
-    flex:1;
-    height:1px;
-    background:var(--rule);
-  }
-
-  .checklist{list-style:none;margin:0 0 8px;padding:0;}
-  .checklist li{
-    display:flex;
-    align-items:flex-start;
-    gap:10px;
-    padding:9px 0;
-    border-bottom:1px dashed var(--rule);
-    font-size:14px;
-    line-height:1.45;
-  }
-  .checklist li:last-child{border-bottom:none;}
-  .checklist input[type="checkbox"]{
-    appearance:none;
-    -webkit-appearance:none;
-    width:17px;height:17px;
-    min-width:17px;
-    border:1.5px solid #B0A588;
-    border-radius:3px;
-    margin-top:2px;
-    cursor:pointer;
-    position:relative;
-    background:#fff;
-  }
-  .checklist input[type="checkbox"]:checked{
-    background:var(--accent,#3E7C6B);
-    border-color:var(--accent,#3E7C6B);
-  }
-  .checklist input[type="checkbox"]:checked::after{
-    content:"";
-    position:absolute;
-    left:5px; top:1px;
-    width:4px; height:9px;
-    border:solid white;
-    border-width:0 2px 2px 0;
-    transform:rotate(40deg);
-  }
-  .checklist label{cursor:pointer;}
-  .checklist li.done label{color:#8E8672;text-decoration:line-through;text-decoration-color:#C7BEA5;}
-
-  .progress-row{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:16px;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    color:var(--text-muted);
-  }
-  .progress-track{
-    flex:1;
-    height:5px;
-    background:var(--paper-dim);
-    border-radius:3px;
-    overflow:hidden;
-  }
-  .progress-fill{
-    height:100%;
-    width:0%;
-    background:var(--accent,#3E7C6B);
-    transition:width .25s ease;
-  }
-
-  .resources{list-style:none;margin:0;padding:0;}
-  .resources li{padding:10px 0;border-bottom:1px dashed var(--rule);}
-  .resources li:last-child{border-bottom:none;}
-  .resources a{
-    color:var(--text-on-paper);
-    font-weight:600;
-    font-size:14px;
-    text-decoration:none;
-    border-bottom:1.5px solid var(--accent,#3E7C6B);
-  }
-  .resources a:hover{opacity:.7;}
-  .resources p{
-    margin:4px 0 0;
-    font-size:12.5px;
-    color:var(--text-muted);
-    line-height:1.5;
-  }
-  .res-tag{
-    display:inline-block;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:9.5px;
-    letter-spacing:.05em;
-    text-transform:uppercase;
-    color:var(--accent,#3E7C6B);
-    border:1px solid currentColor;
-    border-radius:2px;
-    padding:1px 5px;
-    margin-right:8px;
-    vertical-align:1px;
-  }
-
-  .note{
-    margin-top:22px;
-    padding:14px 16px;
-    background:var(--paper-dim);
-    border-left:3px solid var(--accent,#3E7C6B);
-    font-size:13px;
-    line-height:1.55;
-    color:#4A4433;
-    border-radius:0 3px 3px 0;
-  }
-  .note strong{color:var(--text-on-paper);}
-
-  footer{
-    text-align:center;
-    margin-top:36px;
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    color:#6E6656;
-  }
-
-  /* accent wiring per course, applied on the page container */
-  .page[data-course="bsw336"]{--accent:var(--bsw);}
-  .page[data-course="comm304"]{--accent:var(--comm304);}
-  .page[data-course="comm360"]{--accent:var(--comm360);}
-  .page[data-course="cse496"]{--accent:var(--cse496);}
-  .page[data-course="cse545"]{--accent:var(--cse545);}
-  .page[data-course="cse564"]{--accent:var(--cse564);}
-
-  .page[data-course="bsw336"] .stamp{background:var(--bsw-soft);color:var(--bsw);}
-  .page[data-course="comm304"] .stamp{background:var(--comm304-soft);color:var(--comm304);}
-  .page[data-course="comm360"] .stamp{background:var(--comm360-soft);color:var(--comm360);}
-  .page[data-course="cse496"] .stamp{background:var(--cse496-soft);color:var(--cse496);}
-  .page[data-course="cse545"] .stamp{background:var(--cse545-soft);color:var(--cse545);}
-  .page[data-course="cse564"] .stamp{background:var(--cse564-soft);color:var(--cse564);}
+/* Layout: one narrow column, like a stack of cash envelopes you work through top to bottom */
+:root {
+  --bg: #f3f5f2; --card: #ffffff; --fg: #1d2421; --muted: #5d6a64; --line: #dde3df;
+  --accent: #1f7a5a; --accent-soft: #e2f1ea; --warn: #b4442c; --warn-soft: #fbe9e4;
+  --e-rent: #2f6f9f; --e-elec: #c99a1d; --e-cards: #8a4fa3; --e-food: #d0703a; --e-save: #1f7a5a; --e-fun: #7b8a84; --e-subs: #c2477a;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Figtree", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121715; --card: #1b221f; --fg: #e6ece9; --muted: #9aa8a1; --line: #2c3631;
+  --accent: #4cc095; --accent-soft: #1d3329; --warn: #f08a70; --warn-soft: #3a211b;
+  --e-rent: #5ea0d6; --e-elec: #e2bb47; --e-cards: #b884cf; --e-food: #ec9461; --e-save: #4cc095; --e-fun: #8f9e97; --e-subs: #e57ba5;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #121715; --card: #1b221f; --fg: #e6ece9; --muted: #9aa8a1; --line: #2c3631;
+  --accent: #4cc095; --accent-soft: #1d3329; --warn: #f08a70; --warn-soft: #3a211b;
+  --e-rent: #5ea0d6; --e-elec: #e2bb47; --e-cards: #b884cf; --e-food: #ec9461; --e-save: #4cc095; --e-fun: #8f9e97; --e-subs: #e57ba5;
+  color-scheme: dark; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 48px; }
+main { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1 { font-family: var(--display); font-weight: 800; font-size: 2rem; letter-spacing: -0.02em; margin: 0; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 1.15rem; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); margin: 4px 0 0; }
+.num { font-variant-numeric: tabular-nums; }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+label.big { font-weight: 600; }
+.money { display: flex; align-items: center; border: 2px solid var(--accent); border-radius: 12px; background: var(--card); padding: 4px 14px; }
+.money span { font-family: var(--display); font-size: 2rem; color: var(--muted); }
+.money input { border: 0; background: transparent; color: var(--fg); font-family: var(--display); font-weight: 800; font-size: 2.4rem; width: 100%; min-width: 0; padding: 6px 4px; outline: none; font-variant-numeric: tabular-nums; }
+.money:focus-within { box-shadow: 0 0 0 4px var(--accent-soft); }
+.hint { font-size: .85rem; color: var(--muted); margin: 0; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.chips { position: relative; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.chips button { font: inherit; flex: 0 0 auto; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 10px; padding: 8px 12px; cursor: pointer; text-align: left; }
+.chips button small { display: block; font-size: .72rem; color: var(--muted); }
+.chips button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.chips button.paid small { color: var(--accent); }
+.note { background: var(--accent-soft); color: var(--fg); border-radius: 10px; padding: 12px 14px; font-size: .92rem; }
+.bar { display: flex; height: 14px; border-radius: 7px; overflow: hidden; background: var(--line); }
+.bar i { display: block; height: 100%; transition: width .3s; }
+.alert { background: var(--warn-soft); color: var(--warn); border-radius: 10px; padding: 12px 14px; font-weight: 500; }
+.ok { background: var(--accent-soft); color: var(--accent); border-radius: 10px; padding: 12px 14px; font-weight: 500; }
+ol.env { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.env li { display: grid; grid-template-columns: 30px minmax(0,1fr) auto; gap: 12px; align-items: center; background: var(--card); border: 1px solid var(--line); border-left: 6px solid var(--c); border-radius: 12px; padding: 14px; cursor: pointer; user-select: none; }
+.env li.done { opacity: .5; }
+.env li.done .what { text-decoration: line-through; }
+.box { width: 28px; height: 28px; border-radius: 8px; border: 2px solid var(--c); display: grid; place-items: center; color: var(--card); font-weight: 800; }
+.env li.done .box { background: var(--c); }
+.what { font-weight: 600; }
+.how { font-size: .88rem; color: var(--muted); }
+.amt { font-family: var(--display); font-weight: 800; font-size: 1.3rem; }
+ul.bills { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.bills li { display: grid; grid-template-columns: 52px minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.bills li:first-child { border-top: 0; }
+.bills li.off .bname, .bills li.off .bamt { color: var(--muted); text-decoration: line-through; }
+.bname { font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: 0 0 auto; }
+.bdet { font-size: .82rem; color: var(--muted); text-decoration: none; }
+.bamt { font-weight: 600; text-align: right; white-space: nowrap; }
+.switch { position: relative; width: 48px; height: 28px; display: block; }
+.switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; width: 100%; height: 100%; }
+.switch span { position: absolute; inset: 0; background: var(--line); border-radius: 14px; transition: background .2s; }
+.switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .2s; }
+.switch input:checked + span { background: var(--accent); }
+.switch input:checked + span::after { transform: translateX(20px); }
+.switch input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.editrow { grid-column: 2 / -1; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.small-money { display: flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; background: var(--bg); min-width: 0; color: var(--fg); }
+.small-money input, .small-money select { border: 0; background: transparent; color: var(--fg); font: inherit; font-weight: 600; width: 100%; min-width: 0; outline: none; font-variant-numeric: tabular-nums; }
+.editrow .small-money { width: 110px; }
+.secondary { font: inherit; font-weight: 600; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 10px; padding: 10px 12px; cursor: pointer; }
+.danger { color: var(--warn); }
+.danger.armed { background: var(--warn); color: var(--card); border-color: var(--warn); }
+.primary { font: inherit; font-weight: 600; border: 0; background: var(--accent); color: var(--card); border-radius: 10px; padding: 12px; cursor: pointer; }
+.addform { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px dashed var(--line); padding-top: 14px; }
+.addform .full { grid-column: 1 / -1; }
+.addform label { font-size: .85rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rowhead { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.goalrow { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+details { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 4px 18px; }
+summary { font-family: var(--display); font-weight: 600; font-size: 1.05rem; padding: 14px 0; cursor: pointer; }
+.grid { display: grid; grid-template-columns: minmax(0,1fr) 120px; gap: 10px 12px; align-items: center; padding-bottom: 16px; }
+.grid label { font-size: .95rem; }
+.grid .sub { font-size: .8rem; color: var(--muted); display: block; }
+.left-big { font-family: var(--display); font-weight: 800; font-size: 2.6rem; line-height: 1; letter-spacing: -0.02em; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tile { border-radius: 12px; padding: 12px 14px; border: 1px solid var(--line); border-top: 5px solid var(--c); }
+.tile b { display: block; font-family: var(--display); font-size: 1.5rem; font-weight: 800; }
+.tile span { font-size: .85rem; color: var(--muted); }
+input[type=range] { width: 100%; accent-color: var(--e-save); height: 28px; }
+.rangelabels { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); margin-top: -6px; }
+.quick { display: flex; gap: 8px; flex-wrap: wrap; }
+.quick button { font: inherit; font-size: .9rem; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.quick button[aria-pressed="true"] { border-color: var(--e-save); color: var(--e-save); font-weight: 600; }
+.fold { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.fold .ft { display: flex; flex-direction: column; min-width: 0; }
+.foldsub { font-family: var(--body); font-size: .85rem; font-weight: 500; color: var(--muted); }
+.chev { width: 32px; height: 32px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line); color: var(--muted); transition: transform .2s; }
+.fold[aria-expanded="false"] .chev { transform: rotate(-90deg); }
+@media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
+.hoursrow { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.taxes { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 4px 12px; font-size: .92rem; background: var(--bg); border-radius: 10px; padding: 12px 14px; }
+.taxes .neg { color: var(--muted); }
+.taxes .tot { font-weight: 700; border-top: 1px solid var(--line); padding-top: 6px; margin-top: 2px; }
+.linkbtn { font: inherit; font-size: .85rem; font-weight: 600; background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; }
+.pace { border: 1px dashed var(--e-save); border-radius: 10px; padding: 10px 14px; font-size: .92rem; }
+.pace b { color: var(--e-save); }
+.logform { display: grid; grid-template-columns: minmax(0,1fr) 110px auto; gap: 8px; }
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.log li { display: grid; grid-template-columns: minmax(0,1fr) auto 36px; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.log li:first-child { border-top: 0; }
+.log .sub { font-size: .8rem; color: var(--muted); }
+.xbtn { font: inherit; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--muted); cursor: pointer; }
+.card { border: 1px solid var(--line); border-left: 6px solid var(--e-cards); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.card .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.card .big { font-family: var(--display); font-weight: 800; font-size: 1.5rem; }
+.card .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.card .inputs label { font-size: .8rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cost li { grid-template-columns: minmax(0,1fr) 120px 36px; }
+@media (max-width: 520px) { .cost li { grid-template-columns: minmax(0,1fr) 36px; row-gap: 6px; }
+  .cost li > :nth-child(2) { grid-column: 1; grid-row: 2; max-width: 160px; }
+  .cost li > :nth-child(3) { grid-column: 2; grid-row: 1; } }
+.check { display: flex; gap: 10px; align-items: center; font-size: .92rem; }
+.check input { width: 20px; height: 20px; accent-color: var(--e-save); }
+@media (max-width: 380px) { .logform { grid-template-columns: 1fr 1fr; } .logform .primary { grid-column: 1 / -1; } }
+.who { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.who button { font: inherit; font-weight: 600; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+.who button[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.setup { border: 2px solid var(--accent); }
+.setup .grid { padding-bottom: 0; }
+.small-money input[type=date] { font-variant-numeric: tabular-nums; }
+.foot { font-size: .85rem; color: var(--muted); text-align: center; margin: 0; }
+@media (prefers-reduced-motion: reduce) { .bar i, .switch span, .switch span::after { transition: none; } }
 </style>
 </head>
 <body>
-<div class="wrap">
-
+<main>
   <header>
-    <div>
-      <p class="eyebrow">University of Louisville · Fall 2026</p>
-      <h1>Six classes,<br>one <em>binder</em>.</h1>
-      <p class="subhead">Every course you're taking this fall, what to knock out before day one, and where to go when you get stuck mid-semester.</p>
-    </div>
-    <div class="countdown">
-      <div class="num" id="countdownNum">—</div>
-      <div class="label" id="countdownLabel">days until classes start</div>
-    </div>
+    <h1 id="title">Payday</h1>
+    <p class="lede">Pick your payday, type what hit your bank, and follow the list. It tells you where every dollar goes.</p>
   </header>
 
-  <nav class="tabs" id="tabs">
-    <button class="tab" data-course="bsw336" data-mode="online"><span class="code"><span class="mode-dot"></span>BSW 336</span><span class="name">Death & Grief</span></button>
-    <button class="tab" data-course="comm304" data-mode="online"><span class="code"><span class="mode-dot"></span>COMM 304</span><span class="name">Argument</span></button>
-    <button class="tab" data-course="comm360" data-mode="online"><span class="code"><span class="mode-dot"></span>COMM 360</span><span class="name">Web Dev</span></button>
-    <button class="tab" data-course="cse545" data-mode="online"><span class="code"><span class="mode-dot"></span>CSE 545</span><span class="name">AI</span></button>
-    <button class="tab" data-course="cse564" data-mode="online"><span class="code"><span class="mode-dot"></span>CSE 564</span><span class="name">Crypto</span></button>
-    <button class="tab" data-course="cse496" data-mode="in-person"><span class="code"><span class="mode-dot"></span>CSE 496</span><span class="name">Capstone</span></button>
-  </nav>
-  <p class="legend"><span class="mode-dot"></span> Online / Async &nbsp; <span class="mode-dot" style="background:var(--inperson)"></span> In-Person</p>
+  <section class="panel setup" id="setup" aria-labelledby="setuplabel" hidden>
+    <h2 id="setuplabel">Set up your pay</h2>
+    <p class="hint">Fill these in once. You can change them later in Settings at the bottom.</p>
+    <div class="grid" id="setupgrid"></div>
+    <button type="button" class="primary" id="setupdone">Done</button>
+  </section>
 
-  <div id="pages"></div>
+  <section class="panel" aria-labelledby="datelabel">
+    <h2 id="datelabel">Pick your paycheck</h2>
+    <div class="chips" id="dates" role="group" aria-label="Pay dates"></div>
+    <div class="note" id="note" hidden></div>
+    <div class="hoursrow">
+      <label class="big" for="hours">Hours worked this paycheck</label>
+      <div class="small-money" style="width:130px"><input id="hours" type="number" inputmode="decimal" min="0" step="0.25"><span>hrs</span></div>
+    </div>
+    <div class="taxes num" id="taxes" aria-live="polite"></div>
+    <label class="big" for="pay">Take-home pay (what hits your bank)</label>
+    <div class="money"><span>$</span><input id="pay" type="number" inputmode="decimal" step="0.01" min="0"></div>
+    <p class="hint"><span id="payhint"></span> <button type="button" class="linkbtn" id="useest" hidden>Use the estimate instead</button></p>
+  </section>
 
-  <footer>Classes start Monday, August 17, 2026 · Add/drop closes Friday, August 21 · Checkmarks save on this device</footer>
-</div>
+  <section class="stack" aria-labelledby="splitlabel">
+    <h2><button type="button" class="fold" id="fold_check" aria-expanded="true" aria-controls="body_check">
+      <span class="ft"><span id="splitlabel">Bills to pay</span><span class="foldsub" id="sub_check"></span></span>
+      <span class="chev" aria-hidden="true">▾</span></button></h2>
+    <div class="stack" id="body_check">
+      <div class="bar" id="bar" aria-hidden="true"></div>
+      <div id="status"></div>
+      <ol class="env" id="env"></ol>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="leftlabel">
+    <h2 id="leftlabel">Leftover</h2>
+    <div>
+      <div class="hint">Left after bills and groceries</div>
+      <div class="left-big num" id="leftamt">$0.00</div>
+    </div>
+    <label class="big" for="split">How much of it do you want to save?</label>
+    <input type="range" id="split" min="0" max="100" step="5">
+    <div class="rangelabels"><span>All spending</span><span>All savings</span></div>
+    <div class="quick" id="quick">
+      <button type="button" data-p="100">Save it all</button>
+      <button type="button" data-p="80">80 / 20</button>
+      <button type="button" data-p="75">75 / 25</button>
+      <button type="button" data-p="50">50 / 50</button>
+      <button type="button" id="pacebtn" data-p="-1">Goal pace</button>
+    </div>
+    <div class="pace" id="pace"></div>
+    <div class="split">
+      <div class="tile" style="--c:var(--e-save)"><span id="savepct">Savings</span><b class="num" id="saveamt">$0.00</b></div>
+      <div class="tile" style="--c:var(--e-fun)"><span id="funpct">Spending money</span><b class="num" id="funamt">$0.00</b></div>
+    </div>
+    <p class="hint" id="splithint"></p>
+    <ol class="env" id="env2"></ol>
+  </section>
+
+  <section class="panel" aria-labelledby="spendlabel">
+    <h2 id="spendlabel">Spending money left</h2>
+    <div>
+      <div class="hint" id="spendperiod"></div>
+      <div class="left-big num" id="spendleft">$0.00</div>
+    </div>
+    <div class="bar"><i id="spendbar" style="background:var(--e-fun);width:0"></i></div>
+    <div id="spendwarn"></div>
+    <form class="logform" id="spendform">
+      <span class="small-money"><input id="sp_what" type="text" placeholder="What for? (gas, food out)" aria-label="What you spent on"></span>
+      <span class="small-money">$<input id="sp_amt" type="number" inputmode="decimal" min="0" step="0.01" aria-label="Amount spent" required></span>
+      <button type="submit" class="primary">Add</button>
+    </form>
+    <ul class="log num" id="spendlist"></ul>
+  </section>
+
+  <section class="panel" aria-labelledby="billlabel">
+    <h2><button type="button" class="fold" id="fold_bills" aria-expanded="true" aria-controls="body_bills">
+      <span class="ft"><span id="billlabel">Bills by month</span><span class="foldsub" id="sub_bills"></span></span>
+      <span class="chev" aria-hidden="true">▾</span></button></h2>
+    <div class="stack" id="body_bills">
+    <div class="rowhead">
+      <span class="hint">Switch bills on or off for a month.</span>
+      <button type="button" class="secondary" id="editbtn">Edit bills</button>
+    </div>
+    <p class="hint">Pick a month, then switch off anything you don't owe that month. Your paychecks update right away.</p>
+    <div class="chips" id="months" role="group" aria-label="Months"></div>
+    <ul class="bills" id="bills"></ul>
+    <form class="addform" id="addform" hidden>
+      <h2 class="full" style="font-size:1rem">Add a bill</h2>
+      <label class="full">Name<span class="small-money"><input id="a_name" type="text" placeholder="e.g. Phone bill" required></span></label>
+      <label>Full bill amount<span class="small-money">$<input id="a_amt" type="number" inputmode="decimal" min="0" step="0.01" required></span></label>
+      <label>Who pays it<span class="small-money"><select id="a_share">
+        <option value="100">I pay all of it</option>
+        <option value="50">Split in half</option>
+      </select></span></label>
+      <label>How it's paid<span class="small-money"><select id="a_kind">
+        <option value="due">Due on a day</option>
+        <option value="split">Monthly, split across checks</option>
+        <option value="check">Every paycheck</option>
+      </select></span></label>
+      <label id="a_daywrap">Due day<span class="small-money">Day<input id="a_day" type="number" inputmode="numeric" min="1" max="31" step="1" value="1"></span></label>
+      <label class="check full"><input type="checkbox" id="a_card"> It's a credit card or loan (track its balance)</label>
+      <button type="submit" class="primary full">Add bill</button>
+    </form>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="cardlabel">
+    <h2><button type="button" class="fold" id="fold_cards" aria-expanded="true" aria-controls="body_cards">
+      <span class="ft"><span id="cardlabel">Card balances</span><span class="foldsub" id="sub_cards"></span></span>
+      <span class="chev" aria-hidden="true">▾</span></button></h2>
+    <div class="stack" id="body_cards">
+      <p class="hint">Type each balance from your latest statement. Payments you tick off after that come off automatically. When a new statement comes, type the new balance. That also catches any interest.</p>
+      <div class="stack" id="cards"></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="goallabel">
+    <h2 id="goallabel">Moving fund for May 2027</h2>
+    <div class="split">
+      <div class="tile" style="--c:var(--e-save)"><span>Moving fund total</span><b class="num" id="totalamt">$0.00</b></div>
+      <div class="tile" style="--c:var(--e-save)"><span>Moved from paychecks</span><b class="num" id="movedamt">$0.00</b></div>
+    </div>
+    <div class="goalrow">
+      <label for="saved">Savings you already had<span class="hint" style="display:block">Before the Oct 30 paycheck</span></label>
+      <div class="small-money" style="max-width:160px"><span>$</span><input id="saved" type="number" inputmode="decimal" min="0" step="1"></div>
+    </div>
+    <div class="bar" style="position:relative"><i id="projbar" style="position:absolute;left:0;top:0;bottom:0;width:0;background:var(--e-save);opacity:.3"></i><i id="goalbar" style="position:relative;background:var(--e-save);width:0"></i></div>
+    <p class="hint" style="display:flex;gap:14px;flex-wrap:wrap"><span><b style="color:var(--e-save)">■</b> Saved now</span><span><b style="color:var(--e-save);opacity:.4">■</b> Where you'll be by May 1</span></p>
+    <p class="hint num" id="goaltext"></p>
+    <div class="pace num" id="pace2"></div>
+    <p class="hint">When you move money to savings, tick "Move to savings" on that paycheck. It's added here automatically.</p>
+    <h2 style="font-size:1rem;margin-top:6px">What the move will cost</h2>
+    <p class="hint">Fill in real numbers as you find them, using your share where you split costs.</p>
+    <ul class="log cost num" id="costlist"></ul>
+    <div class="rowhead">
+      <button type="button" class="secondary" id="addcost">Add a cost</button>
+      <b class="num" id="costtotal"></b>
+    </div>
+    <label class="check"><input type="checkbox" id="usecosts"> Use this total as my moving fund goal</label>
+  </section>
+
+  <details id="settingsbox">
+    <summary>Settings</summary>
+    <div class="grid" id="settings"></div>
+  </details>
+
+  <details id="backupbox">
+    <summary>Back up or restore</summary>
+    <div class="stack" style="padding-bottom:16px">
+      <p class="hint">Everything you enter is saved only in this browser on this computer. Nobody else can see it, and updating the page doesn't erase it. A backup file is a safety copy, and it's how you move your info to a new browser or computer.</p>
+      <button type="button" class="secondary" id="exportbtn">Download a backup</button>
+      <label class="secondary" for="importfile" style="text-align:center">Restore from a file</label>
+      <input type="file" id="importfile" accept=".json,application/json" hidden>
+      <div id="importmsg" hidden></div>
+    </div>
+  </details>
+
+  <p class="foot">Saved in this browser only. Pay dates are every other Friday. Rent is saved from the month before it's due. Card payments come out of the check before each due date.</p>
+</main>
 
 <script>
-const COURSES = [
-{
-  id:"bsw336",
-  code:"BSW 336",
-  title:"Intro to Death and Grief",
-  meta:"3 credits · Kent School of Social Work",
-  mode:"online",
-  logistics:{platform:"Blackboard", comms:"Teams / Discord", exams:"Respondus", exams_done:true},
-  desc:"An overview of the knowledge and skills bachelor's-level social workers need to practice around death and grief, using ecological-systems and strengths-based approaches. Covers historical context, cultural responses to loss, major grief theories, and the ethics of the work.",
-  checklist:[
-    "Confirm the textbook/reading list once the syllabus posts — social work courses often assign a coursepack, not just one book",
-    "Skim your own assumptions about death and grief before class starts — the course will ask you to examine them, so a head start helps",
-    "Look up whether the course includes a reflection journal or field component, common in BSW electives, so you're not caught off guard",
-    "Note that this content can be heavy some weeks — line up a decompression habit (walk, gym, call a friend) for after class"
-  ],
-  resources:[
-    {tag:"Read", title:"On Grief and Grieving — Kübler-Ross & Kessler", url:"https://www.google.com/search?q=On+Grief+and+Grieving+Kubler-Ross+Kessler", note:"The standard intro text on the stages-of-grief model your course will likely reference and critique."},
-    {tag:"Org", title:"Association for Death Education and Counseling (ADEC)", url:"https://www.adec.org/", note:"The professional body for death/grief work — good for grounding course concepts in real practice standards."},
-    {tag:"Org", title:"National Alliance for Grief Support", url:"https://www.nationalallianceforgrief.org/", note:"Practical, current resource lists — useful for assignments that ask you to evaluate real support services."},
-    {tag:"Listen", title:"Terrible, Thanks for Asking (podcast)", url:"https://www.terribletanksforasking.com/", note:"First-person grief narratives that pair well with the theory you'll cover in lecture."}
-  ],
-  note:"Because the subject is personal, it's worth deciding ahead of time how much of your own experience you're comfortable sharing in class discussion — you're allowed to keep some of it private."
-},
-{
-  id:"comm304",
-  code:"COMM 304",
-  title:"Argument in Everyday Life",
-  meta:"3 credits · Department of Communication",
-  mode:"online",
-  logistics:{platform:"Blackboard", comms:"Teams / Discord", exams:"Respondus", exams_done:true},
-  desc:"Surveys the theory and practice of building and analyzing arguments in public communication — argument structure, evidence, the types and limits of inference, and adapting a message to its audience and context.",
-  checklist:[
-    "Refresh the basics of the Toulmin model (claim, grounds, warrant, backing, rebuttal) — most argument courses build on it from week one",
-    "Pull together 2–3 real arguments you've encountered recently (an ad, an op-ed, a debate clip) to use as personal practice material",
-    "Check whether the course requires in-class debate or presentation — if so, get comfortable with cold-call discussion early",
-    "Buy or rent the textbook once it's listed — argument courses tend to lean on one core text with a reader/anthology"
-  ],
-  resources:[
-    {tag:"Reference", title:"Purdue OWL: Argumentative Essays", url:"https://owl.purdue.edu/owl/general_writing/academic_writing/argument_papers/index.html", note:"Quick, clean refresher on claims, evidence, and counterargument structure."},
-    {tag:"Read", title:"Everything's an Argument — Lunsford, Ruszkiewicz & Walters", url:"https://www.google.com/search?q=Everything%27s+an+Argument+Lunsford", note:"A common companion text for courses like this — worth previewing even if it's not assigned."},
-    {tag:"Watch", title:"Toulmin Model explainer videos", url:"https://www.youtube.com/results?search_query=toulmin+model+of+argument+explained", note:"A 10-minute visual pass before week one makes the first lecture click faster."},
-    {tag:"Practice", title:"Intelligence Squared debates", url:"https://www.intelligencesquaredus.org/", note:"Full-length formal debates — good raw material for practicing argument analysis on your own time."}
-  ]
-},
-{
-  id:"comm360",
-  code:"COMM 360",
-  title:"Web Site Development",
-  meta:"3 credits · Department of Communication",
-  mode:"online",
-  logistics:{platform:"Blackboard", comms:"Teams / Discord", exams:"Respondus", exams_done:true},
-  desc:"Hands-on study of producing and publishing material for the web — creating, editing, and maintaining graphics, audio, and text content, and shipping it as a working site.",
-  checklist:[
-    "You've already built a working Leaflet.js map site this summer — that's a real head start, so skim what the syllabus expects vs. what you already know",
-    "Set up (or confirm access to) a code editor and a place to host projects — GitHub Pages or Netlify are common free options for course sites",
-    "Sanity-check your HTML/CSS fundamentals — this course is likely less about syntax and more about content strategy, accessibility, and visual design",
-    "Check if the department expects Adobe Creative Cloud (Photoshop/Illustrator) — UofL students usually get free access, worth activating early"
-  ],
-  resources:[
-    {tag:"Reference", title:"MDN Web Docs", url:"https://developer.mozilla.org/en-US/docs/Web", note:"The most reliable HTML/CSS/JS reference for anything the course throws at you."},
-    {tag:"Guide", title:"web.dev — Learn", url:"https://web.dev/learn", note:"Google's free curriculum on modern web fundamentals, responsive design, and performance."},
-    {tag:"Standard", title:"WCAG accessibility quick reference", url:"https://www.w3.org/WAI/WCAG21/quickref/", note:"Worth knowing early — most web-dev courses grade on accessibility, not just visual polish."},
-    {tag:"Tool", title:"Figma", url:"https://www.figma.com/", note:"Free for students — useful if the course has you wireframe or mock up a site before building it."}
-  ],
-  note:"This is probably your easiest course on paper given the map project you already built for Ohio River Way — consider it a chance to push your design and content-strategy skills further, not just your code."
-},
-{
-  id:"cse496",
-  code:"CSE 496",
-  title:"BACS Capstone Design",
-  meta:"3 credits · J.B. Speed School of Engineering · CUE",
-  mode:"in-person",
-  logistics:{comms:"Teams / Discord (team coordination)", location:"Check syllabus / self-service for room"},
-  desc:"A senior-standing capstone: apply your CS coursework to a real-world design problem end to end, with heavy emphasis on teamwork and written/oral communication. Fulfills the Culminating Undergraduate Experience requirement, and some sections include a community-based-learning partner.",
-  checklist:[
-    "Confirm your prerequisites are cleared — CSE 350 and CSE 420 are required or corequisite, so double-check your transcript now, not in week one",
-    "Start thinking about a project direction before the semester starts — capstones move fast once teams and topics lock in",
-    "If the section has a community-partner (CBL) option, your Ohio River Way / PaddleTheOhio.com work is a strong candidate to pitch or build on — worth a line to your instructor early",
-    "Update your resume/portfolio — capstone deliverables (demo, writeup, presentation) are exactly what employers ask to see",
-    "Look into team-formation logistics: does the instructor assign teams, or do you self-select?"
-  ],
-  resources:[
-    {tag:"Guide", title:"Speed School Capstone / Senior Design info", url:"https://engineering.louisville.edu/", note:"Check your department page for this term's capstone project list and instructor contact."},
-    {tag:"Reference", title:"Documenting a software capstone: README/writeup best practices", url:"https://www.makeareadme.com/", note:"A clean README template — capstones are graded partly on how well you can explain your own project."},
-    {tag:"Tool", title:"GitHub Projects", url:"https://docs.github.com/en/issues/planning-and-tracking-with-projects", note:"Lightweight project/task tracking that plays well with a small capstone team."}
-  ],
-  note:"Given the audit and outreach work you've already done with Ohio River Way this summer, that project is a genuinely strong capstone candidate — a real client, real data, and a real deliverable already in motion."
-},
-{
-  id:"cse545",
-  code:"CSE 545",
-  title:"Artificial Intelligence",
-  meta:"3 credits · J.B. Speed School of Engineering",
-  mode:"online",
-  logistics:{platform:"Blackboard", comms:"Teams / Discord", exams:"Respondus", exams_done:true},
-  desc:"Introduces predicate calculus logic, heuristic search, and knowledge representation for solving CS problems, with coverage of rule-based expert systems, intelligent agents, and machine learning fundamentals.",
-  checklist:[
-    "Confirm prerequisites — CSE 302 and CSE 310 are both required, so make sure those grades have posted",
-    "Refresh propositional and predicate logic (truth tables, quantifiers, resolution) — the course opens with this before moving to search",
-    "Refresh basic graph search (BFS/DFS, Dijkstra) — heuristic search (A*, minimax) builds directly on it",
-    "Make sure Python is set up and comfortable — most AI coursework and assignments will lean on it",
-    "Get the textbook early if it's Russell & Norvig — it's large and worth having before the reading load starts"
-  ],
-  resources:[
-    {tag:"Read", title:"Artificial Intelligence: A Modern Approach — Russell & Norvig", url:"https://www.google.com/search?q=Artificial+Intelligence+A+Modern+Approach", note:"The standard reference for nearly every undergrad AI course — worth previewing chapters 1–4 (search) before the semester."},
-    {tag:"Course", title:"Stanford CS221: Artificial Intelligence (lecture videos)", url:"https://www.youtube.com/results?search_query=stanford+cs221+artificial+intelligence+lectures", note:"Free lecture series covering search, logic, and agents at roughly the same level as an undergrad AI course."},
-    {tag:"Practice", title:"Khan Academy: Logic & proofs refresher", url:"https://www.khanacademy.org/math/geometry-home/geometry-intro-euclid/geometry-deductive-inductive", note:"Quick warm-up if predicate logic feels rusty."}
-  ]
-},
-{
-  id:"cse564",
-  code:"CSE 564",
-  title:"Introduction to Cryptography",
-  meta:"3 credits · J.B. Speed School of Engineering",
-  mode:"online",
-  logistics:{platform:"Blackboard", comms:"Teams / Discord", exams:"Respondus", exams_done:true},
-  desc:"A historical-to-modern tour of cryptography: classical ciphers up through NIST standards, symmetric and asymmetric encryption, hash functions, digital signatures, and key exchange — with abstract algebra and bit-level programming used to implement AES, RSA, and elliptic-curve systems.",
-  checklist:[
-    "Confirm the prerequisite — CSE 310 — is cleared on your transcript",
-    "Refresh modular arithmetic and basic number theory (gcd, modular inverses, Euler's theorem) before week one — it underpins almost everything in the course",
-    "Refresh bit-level operations in your language of choice (XOR, shifts, bitmasks) — assignments get low-level fast",
-    "Note from past student reviews: programming assignments feel hard at first but click once broken into steps — start them early rather than the night before",
-    "If Dr. Desoky is teaching, his lecture recordings are well regarded — plan to actually watch/attend rather than skim slides"
-  ],
-  resources:[
-    {tag:"Read", title:"Understanding Cryptography — Paar & Pelzl", url:"https://www.google.com/search?q=Understanding+Cryptography+Paar+Pelzl", note:"A widely used, approachable intro-crypto textbook that matches this course's AES/RSA/ECC scope well."},
-    {tag:"Practice", title:"CryptoHack", url:"https://cryptohack.org/", note:"Free, hands-on cryptography puzzles — a genuinely fun way to build intuition before the course's programming assignments start."},
-    {tag:"Refresher", title:"Khan Academy: Modular arithmetic", url:"https://www.khanacademy.org/computing/computer-science/cryptography", note:"A clean, short refresher on the number theory this course assumes."},
-    {tag:"Reference", title:"NIST Cryptographic Standards", url:"https://csrc.nist.gov/projects/cryptographic-standards-and-guidelines", note:"The course explicitly ties classical ciphers to modern NIST standards — worth knowing this exists as a reference."}
-  ]
-}
+// One person per browser. Everything is saved in this browser's local storage under "payday."
+// Keep these storage key names the same in future updates, or saved data won't be found.
+const raw = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const PREFIX = "payday.";
+const DEFAULT_BILLS = [
+  { id: "rent", name: "Rent", amt: 0, kind: "rent", share: 50 },
+  { id: "elec", name: "Electric", amt: 0, kind: "split", share: 50 },
+  { id: "food", name: "Groceries", amt: 0, kind: "check", info: "Food until the next check" }
 ];
+const DEFAULT_OFF = {};
+const DEFAULT_S = { name: "", savePct: 80, goal: 1500, rate: 0, hours: 0, localPct: 0, localNote: "", freq: "biweekly", first: "", partner: "someone in your household" };
+const FREQS = { weekly: ["Every week", 52, 7, 4], biweekly: ["Every 2 weeks", 26, 14, 2], semimonthly: ["Twice a month (15th and last day)", 24, 0, 2], monthly: ["Once a month", 12, 0, 1] };
+const SFIELDS = [
+  ["savePct", "Usual % of leftover to save", "Each paycheck starts here. You can change it per check.", "%"],
+  ["goal", "Moving fund goal", "Used when the moving cost list is empty or turned off"],
+  ["rate", "Hourly pay", "Before taxes", "$"],
+  ["hours", "Normal hours per paycheck", "Hours you usually work each pay period", "hrs"],
+  ["freq", "How often you're paid", "", "freq"],
+  ["first", "A payday", "Your next payday, or a recent one", "date"],
+  ["localPct", "Local occupational tax", "Where you work. Check your first pay stub.", "%"],
+  ["name", "Your name", "Shown at the top of the page", "text"]
+];
+const SETUP_FIELDS = ["name", "rate", "hours", "freq", "first", "localPct"];
+const store = {
+  get(k, d) { return raw.get(PREFIX + k, d); },
+  set(k, v) { raw.set(PREFIX + k, v); }
+};
+let BILLS = store.get("bills4", JSON.parse(JSON.stringify(DEFAULT_BILLS)));
+// A bill's amount is the full bill; "share" is the percent you pay (100 = all of it, 50 = split in half)
+// Only bills marked as a credit card or loan show up under Card balances
+const isCard = b => b.card === true || (b.card === undefined && ["discover", "creditone", "navyfed"].includes(b.id));
+const mine = b => (Number(b.amt) || 0) * ((b.share === undefined ? 100 : Number(b.share)) / 100);
+// Older saved bills stored only your half, marked "Your half". Convert them to full bill + 50% share.
+if (BILLS.some(b => b.share === undefined && /^Your half/.test(b.info || ""))) {
+  BILLS.forEach(b => { if (b.share === undefined && /^Your half/.test(b.info || "")) { b.amt = Math.round(b.amt * 2 * 100) / 100; b.share = 50; b.info = ""; } });
+  store.set("bills4", BILLS);
+}
+let OFF = store.get("off4", JSON.parse(JSON.stringify(DEFAULT_OFF)));
+let S = Object.assign({}, DEFAULT_S, store.get("settings4", {}));
+let done = store.get("done2", {});
+let pays = store.get("pays", {});
+let splits = store.get("splits", {});
+let hrs = store.get("hours", {});
+let spends = store.get("spends", {});
+let balances = store.get("balances", {});
+const DEFAULT_COSTS = [
+  { id: "dep", name: "Security deposit (your half)", amt: 0 },
+  { id: "first", name: "First month's rent (your half)", amt: 0 },
+  { id: "app", name: "Application fees", amt: 0 },
+  { id: "truck", name: "Moving truck or help", amt: 0 },
+  { id: "util", name: "Utility setup and deposits", amt: 0 },
+  { id: "supplies", name: "Boxes and supplies", amt: 0 }
+];
+let costs = store.get("costs", JSON.parse(JSON.stringify(DEFAULT_COSTS)));
+let useCosts = store.get("useCosts", true);
+const costTotal = () => costs.reduce((a, c) => a + (Number(c.amt) || 0), 0);
+const goal = () => useCosts && costTotal() > 0 ? costTotal() : S.goal;
+let moved = store.get("moved", {});
+let lastSel = null, lastMonth = null;
+let folds = store.get("folds", { check: false, bills: true }); // true = minimized
+if (folds.cards === undefined) folds.cards = false;
+function applyFolds() {
+  ["check", "bills", "cards"].forEach(id => { const c = !!folds[id]; $("fold_" + id).setAttribute("aria-expanded", !c); $("body_" + id).hidden = c; });
+}
+const billItems = p => p.items.filter(i => i.amt > 0.004 && i.k !== "save" && i.k !== "fun");
+let editing = false, armed = null;
+const $ = id => document.getElementById(id);
+const fmt = n => "$" + (Math.round(n * 100) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const FULL = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-const pagesEl = document.getElementById('pages');
-const tabsEl = document.getElementById('tabs');
-
-function renderPage(course){
-  const div = document.createElement('div');
-  div.className = 'page';
-  div.dataset.course = course.id;
-  div.dataset.mode = course.mode;
-
-  const checklistItems = course.checklist.map((text,i)=>{
-    const cid = `chk-${course.id}-${i}`;
-    return `<li data-cid="${cid}">
-      <input type="checkbox" id="${cid}">
-      <label for="${cid}">${text}</label>
-    </li>`;
-  }).join('');
-
-  const resourceItems = course.resources.map(r=>`
-    <li>
-      <span class="res-tag">${r.tag}</span><a href="${r.url}" target="_blank" rel="noopener">${r.title}</a>
-      <p>${r.note}</p>
-    </li>`).join('');
-
-  const modeLabel = course.mode === 'in-person' ? 'In-Person' : 'Online · Async';
-  const l = course.logistics || {};
-  const logisticsItems = [
-    l.platform ? `<div class="item"><span class="k">Platform</span><span class="v">${l.platform}</span></div>` : '',
-    l.comms ? `<div class="item"><span class="k">Comms</span><span class="v">${l.comms}</span></div>` : '',
-    l.exams ? `<div class="item"><span class="k">Exams</span><span class="v${l.exams_done?' check':''}">${l.exams}${l.exams_done?' set up':''}</span></div>` : '',
-    l.location ? `<div class="item"><span class="k">Location</span><span class="v">${l.location}</span></div>` : ''
-  ].join('');
-
-  div.innerHTML = `
-    <div class="page-head">
-      <div>
-        <span class="stamp">${course.code}</span>
-        <span class="mode-pill ${course.mode}">${modeLabel}</span>
-        <h2>${course.title}</h2>
-        <div class="meta-line">${course.meta}</div>
-        <div class="logistics">${logisticsItems}</div>
-      </div>
-    </div>
-    <p class="desc">${course.desc}</p>
-    <div class="cols" style="margin-top:28px;">
-      <div>
-        <h3 class="section-title">Before it starts</h3>
-        <div class="progress-row">
-          <span class="progress-count">0 / ${course.checklist.length}</span>
-          <div class="progress-track"><div class="progress-fill"></div></div>
-        </div>
-        <ul class="checklist">${checklistItems}</ul>
-      </div>
-      <div>
-        <h3 class="section-title">Resources</h3>
-        <ul class="resources">${resourceItems}</ul>
-      </div>
-    </div>
-    ${course.note ? `<div class="note">${course.note}</div>` : ''}
-  `;
-  pagesEl.appendChild(div);
-
-  // wire checkboxes
-  const boxes = div.querySelectorAll('.checklist input[type="checkbox"]');
-  const fill = div.querySelector('.progress-fill');
-  const count = div.querySelector('.progress-count');
-
-  function updateProgress(){
-    const total = boxes.length;
-    const checked = Array.from(boxes).filter(b=>b.checked).length;
-    fill.style.width = (checked/total*100) + '%';
-    count.textContent = `${checked} / ${total}`;
+const needsSetup = () => !(S.rate > 0) || !S.first;
+const PPY = (FREQS[S.freq] || FREQS.biweekly)[1];
+const PER_MONTH = (FREQS[S.freq] || FREQS.biweekly)[3];
+// Pay dates from the chosen schedule, starting at the payday given, through Jun 2027
+const DATES = (() => {
+  const out = [], hi = new Date(2027, 5, 30);
+  const f = S.freq in FREQS ? S.freq : "biweekly";
+  let anchor = S.first ? new Date(S.first + "T00:00:00") : null;
+  if (!anchor || isNaN(anchor)) { anchor = new Date(); anchor.setHours(0, 0, 0, 0); anchor.setDate(anchor.getDate() + ((5 - anchor.getDay() + 7) % 7)); }
+  if (f === "weekly" || f === "biweekly") {
+    const step = FREQS[f][2];
+    for (const d = new Date(anchor); d <= hi; d.setDate(d.getDate() + step)) out.push(new Date(d));
+  } else {
+    const day = anchor.getDate();
+    for (let m = anchor.getMonth(), y = anchor.getFullYear(); new Date(y, m, 1) <= hi; m++) {
+      const last = new Date(y, m + 1, 0).getDate();
+      const days = f === "semimonthly" ? [15, last] : [Math.min(day, last)];
+      days.forEach(dd => { const x = new Date(y, m, dd); if (x >= anchor && x <= hi) out.push(x); });
+    }
   }
+  return out;
+})();
+const key = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const mkey = (y, m) => { const d = new Date(y, m, 1); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0"); };
+const label = d => MON[d.getMonth()] + " " + d.getDate();
+// An "extra" paycheck is one beyond the usual count for the month (a 3rd biweekly check, a 5th weekly check)
+const isThird = d => DATES.filter(x => x.getFullYear() === d.getFullYear() && x.getMonth() === d.getMonth() && x <= d).length > PER_MONTH;
+const share = n => n === 2 ? "half" : n === 1 ? "all" : "1/" + n;
+const fundersIn = (y, m) => { const t = new Date(y, m, 1); return DATES.filter(x => x.getFullYear() === t.getFullYear() && x.getMonth() === t.getMonth() && !isThird(x)); };
+const MOVE = new Date(2027, 4, 1);
+const MONTH_LIST = []; for (let i = 0; i < 8; i++) MONTH_LIST.push(new Date(2026, 9 + i, 1));
+const isOff = (b, mk) => !!(OFF[mk] && OFF[mk][b.id]);
+const color = b => b.kind === "rent" ? "--e-rent" : b.id === "elec" ? "--e-elec" : b.kind === "due" ? "--e-cards" : b.kind === "check" ? "--e-food" : "--e-subs";
 
-  boxes.forEach(box=>{
-    const key = `checklist:${course.id}:${box.id}`;
-    window.storage?.get(key).then(res=>{
-      if(res && res.value === 'true'){
-        box.checked = true;
-        box.closest('li').classList.add('done');
+const today = new Date(); today.setHours(0, 0, 0, 0);
+let sel = store.get("sel", null);
+if (!sel || !DATES.some(d => key(d) === sel)) { const past = DATES.filter(d => d <= today); sel = key(past.length ? past[past.length - 1] : DATES[0]); }
+let bmonth = store.get("bmonth", null);
+if (!bmonth || !MONTH_LIST.some(d => mkey(d.getFullYear(), d.getMonth()) === bmonth)) bmonth = "2026-11";
+
+const hoursFor = k => hrs[k] !== undefined && hrs[k] !== "" ? Math.max(parseFloat(hrs[k]) || 0, 0) : S.hours;
+// 2026 estimates, single filer: federal brackets after the $16,100 standard deduction,
+// FICA 7.65%, Kentucky flat 3.5% after a $3,360 standard deduction, plus the local occupational rate
+const FED = [[12400, 0.10], [50400, 0.12], [105700, 0.22], [201775, 0.24], [Infinity, 0.32]];
+function fedTax(annual) {
+  let t = 0, lo = 0, taxable = Math.max(0, annual - 16100);
+  for (const [top, r] of FED) { if (taxable > lo) t += (Math.min(taxable, top) - lo) * r; lo = top; }
+  return t;
+}
+function taxes(h) {
+  const g = h * S.rate;
+  const fed = fedTax(g * PPY) / PPY;
+  const fica = g * 0.0765;
+  const ky = Math.max(0, g - 3360 / PPY) * 0.035;
+  const local = g * S.localPct / 100;
+  return { g, fed, fica, ky, local, net: g - fed - fica - ky - local };
+}
+const defaultPay = k => Math.round(taxes(hoursFor(k)).net * 100) / 100;
+const payFor = d => { const k = key(d); return pays[k] !== undefined ? Math.max(parseFloat(pays[k]) || 0, 0) : defaultPay(k); };
+
+function plan(d, pay) {
+  const y = d.getFullYear(), m = d.getMonth(), third = isThird(d);
+  const i = DATES.findIndex(x => key(x) === key(d));
+  const next = DATES[i + 1] || new Date(y, m, d.getDate() + 14);
+  const fixed = [], flex = [], notes = [];
+  BILLS.forEach(b => {
+    const c = color(b);
+    if (b.kind === "rent") {
+      if (third) return;
+      const due = new Date(y, m + 1, 1);
+      if (isOff(b, mkey(y, m + 1))) return;
+      const n = fundersIn(y, m).length || 1;
+      fixed.push({ k: b.id, what: FULL[due.getMonth()] + " " + b.name.charAt(0).toLowerCase() + b.name.slice(1), how: (n > 1 ? `${share(n)[0].toUpperCase() + share(n).slice(1)} of your ${fmt(mine(b))}${mine(b) < b.amt ? " share" : ""}. Move to savings so it's ready on the 1st.` : `All of your ${fmt(mine(b))}${mine(b) < b.amt ? " share" : ""}. This is the only check before it's due on the 1st.`), amt: mine(b) / n, c });
+      if (n === 1) notes.push(`Your full ${FULL[due.getMonth()]} rent comes out of this check.`);
+    } else if (b.kind === "split") {
+      if (third || isOff(b, mkey(y, m))) return;
+      const n = fundersIn(y, m).length || 1;
+      fixed.push({ k: b.id, what: b.name + (n > 1 ? ` (${share(n)})` : ""), how: (n > 1 ? `${share(n)[0].toUpperCase() + share(n).slice(1)} of your ${fmt(mine(b))}${mine(b) < b.amt ? " share" : ""} for ${FULL[m]}.` : `Your ${fmt(mine(b))}${mine(b) < b.amt ? " share" : ""} for ${FULL[m]}.`) + (b.id === "elec" ? " Set it aside until the bill comes." : " Leave in checking for auto-pay."), amt: mine(b) / n, c });
+    } else if (b.kind === "due") {
+      for (let o = -1; o <= 1; o++) {
+        const due = new Date(y, m + o, Math.min(b.day, new Date(y, m + o + 1, 0).getDate()));
+        if (due >= d && due < next && !isOff(b, mkey(due.getFullYear(), due.getMonth())))
+          fixed.push({ k: b.id + "-" + key(due), what: "Pay " + b.name, how: "Due " + label(due) + ". Pay it now.", amt: mine(b), c });
       }
-      updateProgress();
-    }).catch(()=>{ updateProgress(); });
+    } else if (b.kind === "check") {
+      if (!isOff(b, mkey(y, m))) flex.push({ k: b.id, what: b.name, how: "Until your next paycheck.", amt: mine(b), want: mine(b), c });
+    }
+  });
+  const fixedSum = fixed.reduce((a, x) => a + x.amt, 0);
+  let left = pay - fixedSum, cut = 0;
+  flex.forEach(f => { const got = Math.min(f.want, Math.max(left, 0)); if (got < f.want) { cut += f.want - got; f.how = "Only " + fmt(got) + " this time, so keep meals simple."; } f.amt = got; left -= got; });
+  const short = fixedSum > pay ? fixedSum - pay : 0;
+  const leftover = Math.max(left, 0);
+  const pct = splits[key(d)] !== undefined ? splits[key(d)] : S.savePct;
+  const save = Math.round(leftover * pct) / 100;
+  const items = fixed.concat(flex);
+  items.push({ k: "save", what: "Move to savings", how: "Do this first, before you spend anything.", amt: save, c: "--e-save" });
+  items.push({ k: "fun", what: "Spending money", how: "Yours for gas, eating out, fun.", amt: leftover - save, c: "--e-fun" });
+  if (third) notes.unshift("Extra paycheck this month. Rent and monthly bills are already covered by your other checks, so most of it goes to savings.");
+  items.forEach(x => x.amt = Math.max(x.amt, 0));
+  return { items, note: notes.join(" "), short, cut, leftover, pct };
+}
 
-    box.addEventListener('change', ()=>{
-      box.closest('li').classList.toggle('done', box.checked);
-      updateProgress();
-      window.storage?.set(key, box.checked ? 'true' : 'false').catch(()=>{});
+function renderDates() {
+  const box = $("dates"); const keep = box.scrollLeft; box.innerHTML = "";
+  DATES.filter(d => d < MOVE || key(d) === sel).forEach(d => {
+    const k = key(d), b = document.createElement("button");
+    b.type = "button"; b.setAttribute("aria-pressed", k === sel);
+    const live = plan(d, payFor(d)).items.filter(i => i.amt > 0.004);
+    const dn = live.filter(i => (done[k] || {})[i.k]).length, all = live.length && dn === live.length;
+    if (all) b.className = "paid";
+    b.innerHTML = `${label(d)}<small>${all ? "✓ Done" : isThird(d) ? "Extra check" : d < today ? "Past" : "Upcoming"}</small>`;
+    b.addEventListener("click", () => {
+      sel = k; store.set("sel", sel);
+      const bi = billItems(plan(d, payFor(d)));
+      if (!bi.every(x => (done[k] || {})[x.k])) { folds.check = false; store.set("folds", folds); }
+      render();
     });
+    box.appendChild(b);
+  });
+  const cur = box.querySelector('[aria-pressed="true"]');
+  if (cur && lastSel !== sel) box.scrollLeft = cur.offsetLeft - box.clientWidth / 2 + cur.offsetWidth / 2; else box.scrollLeft = keep;
+  lastSel = sel;
+}
+
+function billDetail(b, y, m) {
+  if (b.kind === "rent") { const p = new Date(y, m - 1, 1); return `Due ${MON[m]} 1. Saved from your ${FULL[p.getMonth()]} checks.`; }
+  if (b.kind === "split") return (b.info ? b.info + ". " : "") + `Paid from your ${FULL[m]} checks.`;
+  if (b.kind === "due") return `Due ${MON[m]} ${Math.min(b.day, new Date(y, m + 1, 0).getDate())}.`;
+  return (b.info ? b.info + ". " : "") + `Every ${FULL[m]} paycheck.`;
+}
+
+function renderBills() {
+  const mb = $("months"); const keepM = mb.scrollLeft; mb.innerHTML = "";
+  MONTH_LIST.forEach(d => {
+    const mk = mkey(d.getFullYear(), d.getMonth()), b = document.createElement("button");
+    b.type = "button"; b.setAttribute("aria-pressed", mk === bmonth);
+    const offN = BILLS.filter(x => isOff(x, mk)).length;
+    b.innerHTML = `${MON[d.getMonth()]} '${String(d.getFullYear()).slice(2)}<small>${offN ? offN + " off" : "All on"}</small>`;
+    b.addEventListener("click", () => { bmonth = mk; store.set("bmonth", bmonth); renderBills(); });
+    mb.appendChild(b);
+  });
+  const curM = mb.querySelector('[aria-pressed="true"]');
+  if (curM && lastMonth === null) mb.scrollLeft = curM.offsetLeft - mb.clientWidth / 2 + curM.offsetWidth / 2; else mb.scrollLeft = keepM;
+  lastMonth = bmonth;
+  const [Y, M] = bmonth.split("-").map(Number), y = Y, m = M - 1;
+  const ul = $("bills"); ul.innerHTML = "";
+  BILLS.forEach(b => {
+    const on = !isOff(b, bmonth), li = document.createElement("li");
+    if (!on) li.className = "off";
+    li.style.setProperty("--c", `var(${color(b)})`);
+    const id = "sw_" + b.id;
+    li.innerHTML = `<label class="switch"><input type="checkbox" id="${id}" ${on ? "checked" : ""}><span></span></label>
+      <div style="min-width:0"><label class="bname" for="${id}"><i class="dot"></i><span></span></label><div class="bdet"></div></div>
+      <div class="bamt num">${fmt(mine(b))}<div class="bdet">${b.kind === "check" ? "per check" : "per month"}</div></div>`;
+    li.querySelector(".bname span").textContent = b.name;
+    const sh = b.share === undefined ? 100 : Number(b.share);
+    li.querySelector(".bdet").textContent = (sh < 100 ? `Your ${sh === 50 ? "half" : sh + "%"} of ${fmt(b.amt)}. ` : "") + billDetail(b, y, m);
+    li.querySelector("input").addEventListener("change", e => {
+      OFF[bmonth] = OFF[bmonth] || {};
+      if (e.target.checked) delete OFF[bmonth][b.id]; else OFF[bmonth][b.id] = true;
+      store.set("off4", OFF); render();
+    });
+    if (editing) {
+      const er = document.createElement("div"); er.className = "editrow";
+      const shv = b.share === undefined ? 100 : Number(b.share);
+      er.innerHTML = `<span class="small-money" title="Full bill">$<input type="number" inputmode="decimal" min="0" step="0.01" id="amt_${b.id}"></span>` +
+        `<span class="small-money" style="width:auto"><select id="share_${b.id}" aria-label="${b.name} split">` +
+        `<option value="100">I pay all of it</option><option value="50">Split in half</option>` +
+        (shv !== 100 && shv !== 50 ? `<option value="${shv}">I pay ${shv}%</option>` : "") + `</select></span>` +
+        (b.kind === "due" ? `<span class="small-money">Day<input type="number" inputmode="numeric" min="1" max="31" step="1" id="day_${b.id}"></span>` : "") +
+        `<button type="button" class="secondary danger${armed === b.id ? " armed" : ""}">${armed === b.id ? "Tap again to remove" : "Remove"}</button>` +
+        `<label class="check" style="flex-basis:100%"><input type="checkbox" class="cardtoggle" id="card_${b.id}"> Credit card or loan</label>`;
+      const ins = er.querySelectorAll('input[type="number"]');
+      ins[0].value = b.amt; ins[0].setAttribute("aria-label", b.name + " full bill amount");
+      const shs = er.querySelector("select"); shs.value = String(shv);
+      shs.addEventListener("change", () => { b.share = Number(shs.value); store.set("bills4", BILLS); render(); });
+      ins[0].addEventListener("change", () => { b.amt = Math.max(parseFloat(ins[0].value) || 0, 0); store.set("bills4", BILLS); render(); });
+      if (ins[1]) { ins[1].value = b.day; ins[1].setAttribute("aria-label", b.name + " due day"); ins[1].addEventListener("change", () => { b.day = Math.min(Math.max(Math.round(parseFloat(ins[1].value)) || 1, 1), 31); store.set("bills4", BILLS); render(); }); }
+      const ct = er.querySelector(".cardtoggle"); ct.checked = isCard(b);
+      ct.addEventListener("change", () => { b.card = ct.checked; store.set("bills4", BILLS); render(); });
+      er.querySelector("button").addEventListener("click", () => {
+        if (armed === b.id) { BILLS = BILLS.filter(x => x !== b); armed = null; store.set("bills4", BILLS); render(); }
+        else { armed = b.id; renderBills(); }
+      });
+      li.appendChild(er);
+    }
+    ul.appendChild(li);
+  });
+  const sum = BILLS.filter(b => !isOff(b, bmonth) && b.kind !== "check").reduce((a, b) => a + mine(b), 0);
+  const li = document.createElement("li");
+  li.innerHTML = `<span></span><div><b>${FULL[m]} bills</b><div class="bdet">Not counting groceries</div></div><div class="bamt num"><b>${fmt(sum)}</b></div>`;
+  ul.appendChild(li);
+  $("sub_bills").textContent = `${FULL[m]}: ${fmt(sum)} in bills, plus groceries`;
+  $("editbtn").textContent = editing ? "Done editing" : "Edit bills";
+  $("addform").hidden = !editing;
+}
+
+function render() {
+  const d = DATES.find(x => key(x) === sel), k = sel;
+  if (document.activeElement !== $("pay")) $("pay").value = pays[k] === undefined ? defaultPay(k) : pays[k];
+  const pay = payFor(d);
+  if (document.activeElement !== $("hours")) $("hours").value = hoursFor(k);
+  { const t = taxes(hoursFor(k)), row = (a, b, c) => `<span${c ? ` class="${c}"` : ""}>${a}</span><span${c ? ` class="${c}"` : ""}>${b}</span>`;
+    $("taxes").innerHTML = row(`Gross pay (${hoursFor(k)} hrs × ${fmt(S.rate)})`, fmt(t.g)) +
+      row("Federal income tax", "−" + fmt(t.fed), "neg") + row("Social Security + Medicare", "−" + fmt(t.fica), "neg") +
+      row("Kentucky income tax", "−" + fmt(t.ky), "neg") + row(`Local tax (${S.localPct}%${S.localNote ? ", " + S.localNote : ""})`, "−" + fmt(t.local), "neg") +
+      row("Estimated take-home", fmt(t.net), "tot"); }
+  $("payhint").textContent = pays[k] === undefined
+    ? "Estimated from your hours. When the money lands, type the real amount if it's different."
+    : `You typed the real amount. The estimate was ${fmt(defaultPay(k))}.`;
+  $("useest").hidden = pays[k] === undefined;
+  const p = plan(d, pay);
+  $("note").hidden = !p.note; $("note").textContent = p.note;
+  $("splitlabel").textContent = label(d) + " paycheck: bills to pay";
+  const dk = done[k] || (done[k] = {});
+  { const sv = p.items.find(i => i.k === "save").amt;
+    if (moved[k] !== undefined && Math.abs(moved[k] - sv) > 0.004) { moved[k] = sv; store.set("moved", moved); } }
+  { const bi = billItems(p), dn = bi.filter(i => dk[i.k]).length, tot = bi.reduce((a, b) => a + b.amt, 0);
+    $("sub_check").textContent = bi.length && dn === bi.length ? `All ${bi.length} paid ✓ · ${fmt(tot)}` : `${fmt(tot)} · ${dn} of ${bi.length} paid`; }
+  const env = $("env"); env.innerHTML = ""; $("env2").innerHTML = "";
+  const live = p.items.filter(i => i.amt > 0.004);
+  live.forEach(it => {
+    const li = document.createElement("li");
+    li.style.setProperty("--c", `var(${it.c})`);
+    if (dk[it.k]) li.className = "done";
+    li.tabIndex = 0; li.setAttribute("role", "checkbox"); li.setAttribute("aria-checked", !!dk[it.k]);
+    li.innerHTML = `<span class="box">${dk[it.k] ? "✓" : ""}</span><div style="min-width:0"><div class="what"></div><div class="how"></div></div><div class="amt num">${fmt(it.amt)}</div>`;
+    li.querySelector(".what").textContent = it.what;
+    li.querySelector(".how").textContent = it.how;
+    const toggle = () => {
+      dk[it.k] = !dk[it.k]; store.set("done2", done);
+      if (it.k === "save") { if (dk[it.k]) moved[k] = it.amt; else delete moved[k]; store.set("moved", moved); }
+      const bi = billItems(p);
+      if (dk[it.k] && bi.some(b => b.k === it.k) && bi.every(b => dk[b.k])) { folds.check = true; store.set("folds", folds); }
+      render();
+    };
+    li.addEventListener("click", toggle);
+    li.addEventListener("keydown", e => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); toggle(); } });
+    (it.k === "save" || it.k === "fun" ? $("env2") : env).appendChild(li);
+  });
+  const sv = p.items.find(i => i.k === "save").amt, fn = p.items.find(i => i.k === "fun").amt;
+  $("leftamt").textContent = fmt(p.leftover);
+  if (document.activeElement !== $("split")) $("split").value = p.pct;
+  $("saveamt").textContent = fmt(sv); $("funamt").textContent = fmt(fn);
+  $("savepct").textContent = `Savings (${p.pct}%)`; $("funpct").textContent = `Spending money (${100 - p.pct}%)`;
+  document.querySelectorAll("#quick button:not(#pacebtn)").forEach(b => b.setAttribute("aria-pressed", Number(b.dataset.p) === p.pct));
+  $("splithint").textContent = p.leftover > 0 ? "Tap each one below when it's done." : "Nothing left over on this check after bills.";
+  const total = live.reduce((a, b) => a + b.amt, 0) || 1;
+  $("bar").innerHTML = live.map(i => `<i style="width:${i.amt / total * 100}%;background:var(${i.c})"></i>`).join("");
+  const st = $("status");
+  if (p.short > 0) { st.className = "alert"; st.textContent = `This check is ${fmt(p.short)} short of the bills due. Pay rent and cards first, then cover the rest from savings.`; }
+  else if (p.cut > 0) { st.className = "alert"; st.textContent = `Tight check: groceries are ${fmt(p.cut)} less than usual. Ask if ${S.partner} can help with food until your next check.`; }
+  else { const dn = live.filter(i => dk[i.k]).length;
+    st.className = "ok"; st.textContent = dn === live.length ? "All done for this paycheck. Nice work." : `${dn} of ${live.length} done.`; }
+
+  const start = Math.max(parseFloat($("saved").value) || 0, 0);
+  const fromChecks = Object.values(moved).reduce((a, v) => a + (Number(v) || 0), 0);
+  const saved = start + fromChecks;
+  $("movedamt").textContent = fmt(fromChecks); $("totalamt").textContent = fmt(saved);
+  const coming = DATES.filter(x => x >= today && x < MOVE && moved[key(x)] === undefined)
+    .reduce((a, x) => a + (plan(x, payFor(x)).items.find(i => i.k === "save") || { amt: 0 }).amt, 0);
+  const proj = saved + coming;
+  const rest = DATES.filter(x => x >= today && x < MOVE && moved[key(x)] === undefined).map(x => plan(x, payFor(x))).filter(q => q.leftover > 0);
+  const G = goal();
+  const need = Math.max(G - saved, 0), restLeft = rest.reduce((a, q) => a + q.leftover, 0);
+  const perCheck = rest.length ? need / rest.length : 0;
+  const pacePct = restLeft > 0 ? Math.min(100, Math.ceil(need / restLeft * 100 / 5) * 5) : 100;
+  $("pacebtn").dataset.p = pacePct; $("pacebtn").textContent = `Goal pace (${pacePct}%)`;
+  $("pacebtn").setAttribute("aria-pressed", p.pct === pacePct);
+  const paceTxt = need <= 0 ? `You've already reached your ${fmt(G)} goal.`
+    : `To have ${fmt(G)} by May 1, save about <b>${fmt(perCheck)}</b> from each of your next ${rest.length} paychecks. Some checks have more left over than others, so saving <b>${pacePct}%</b> of every leftover gets you there.`;
+  $("pace2").innerHTML = paceTxt;
+  $("pace").innerHTML = need <= 0 ? paceTxt : p.leftover <= 0 ? `Goal pace is about <b>${fmt(perCheck)}</b> per paycheck. This one has nothing left over, so the others will make up for it.`
+    : sv + 0.004 >= perCheck ? `Goal pace is about <b>${fmt(perCheck)}</b> per paycheck. You're saving ${fmt(sv)} from this one, so you're ahead.`
+    : `Goal pace is about <b>${fmt(perCheck)}</b> per paycheck. This one saves ${fmt(sv)}. Tap "Goal pace" to save ${pacePct}% of every leftover and stay on track.`;
+  $("goalbar").style.width = (G > 0 ? Math.min(saved / G, 1) * 100 : 0) + "%";
+  $("projbar").style.width = (G > 0 ? Math.min(proj / G, 1) * 100 : 0) + "%";
+  $("goaltext").textContent = `${fmt(saved)} saved so far. If you stick to the plan, you'll have about ${fmt(proj)} by May 1` +
+    (proj >= G ? `, which beats your ${fmt(G)} goal.` : `, ${fmt(G - proj)} short of your ${fmt(G)} goal.`);
+  renderDates();
+  renderBills();
+  renderSpending(d, p);
+  renderCards();
+  $("costtotal").textContent = "Total: " + fmt(costTotal());
+  $("usecosts").checked = useCosts;
+  applyFolds();
+}
+
+function renderSpending(d, p) {
+  const k = key(d), i = DATES.findIndex(x => key(x) === k), next = DATES[i + 1];
+  const budget = p.items.find(x => x.k === "fun").amt;
+  const list = spends[k] || [], spent = list.reduce((a, x) => a + x.amt, 0), left = budget - spent;
+  const end = next ? new Date(next.getFullYear(), next.getMonth(), next.getDate() - 1) : null;
+  $("spendperiod").textContent = `From your ${label(d)} paycheck${end ? ", through " + label(end) : ""} · ${fmt(spent)} spent of ${fmt(budget)}`;
+  $("spendleft").textContent = left < 0 ? "−" + fmt(-left) : fmt(left);
+  $("spendleft").style.color = left < 0 ? "var(--warn)" : "";
+  $("spendbar").style.width = (budget > 0 ? Math.min(spent / budget, 1) * 100 : spent > 0 ? 100 : 0) + "%";
+  $("spendbar").style.background = left < 0 ? "var(--warn)" : "var(--e-fun)";
+  const w = $("spendwarn");
+  if (left < 0) { w.className = "alert"; w.textContent = `You've spent ${fmt(-left)} more than your spending money. That's coming out of bill or grocery money, so hold off until ${next ? label(next) : "your next check"}.`; }
+  else if (budget > 0 && left < budget * 0.2) { w.className = "alert"; w.textContent = `Only ${fmt(left)} left until ${next ? label(next) : "your next check"}.`; }
+  else { w.className = ""; w.textContent = ""; }
+  const ul = $("spendlist"); ul.innerHTML = "";
+  if (!list.length) { const li = document.createElement("li"); li.innerHTML = '<span class="sub">Nothing logged yet. Add each purchase above.</span>'; ul.appendChild(li); }
+  list.slice().reverse().forEach(x => {
+    const li = document.createElement("li");
+    li.innerHTML = `<div style="min-width:0"><div class="w"></div><div class="sub"></div></div><b>${fmt(x.amt)}</b><button type="button" class="xbtn" aria-label="Remove">×</button>`;
+    li.querySelector(".w").textContent = x.what || "Spending";
+    li.querySelector(".sub").textContent = x.date;
+    li.querySelector("button").addEventListener("click", () => { spends[k] = list.filter(y => y !== x); store.set("spends", spends); render(); });
+    ul.appendChild(li);
   });
 }
 
-COURSES.forEach(renderPage);
-
-// tab switching
-function activate(id){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.course===id));
-  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active', p.dataset.course===id));
+function cardPaid(b, info) {
+  let paid = 0;
+  Object.values(done).forEach(dk => Object.keys(dk).forEach(ik => {
+    if (dk[ik] && ik.startsWith(b.id + "-") && ik.slice(b.id.length + 1) >= info.asOf) paid += mine(b);
+  }));
+  return paid + (info.extras || []).reduce((a, e) => a + e.amt, 0);
 }
-tabsEl.addEventListener('click', e=>{
-  const btn = e.target.closest('.tab');
-  if(!btn) return;
-  activate(btn.dataset.course);
-});
-activate(COURSES[0].id);
 
-// countdown to Aug 17, 2026
-function updateCountdown(){
-  const start = new Date('2026-08-17T00:00:00');
-  const now = new Date();
-  const diffMs = start - now;
-  const days = Math.ceil(diffMs / (1000*60*60*24));
-  const numEl = document.getElementById('countdownNum');
-  const labelEl = document.getElementById('countdownLabel');
-  if(days > 0){
-    numEl.textContent = days;
-    labelEl.textContent = 'days until classes start';
-  } else if(days === 0){
-    numEl.textContent = 'Today';
-    labelEl.textContent = 'classes start today';
+function renderCards() {
+  const box = $("cards");
+  if (box.contains(document.activeElement)) return;
+  box.innerHTML = "";
+  let totalLeft = 0, tracked = 0;
+  BILLS.filter(isCard).forEach(b => {
+    const info = balances[b.id] || {};
+    const has = info.start !== undefined && info.start !== "";
+    const paid = has ? cardPaid(b, info) : 0, left = has ? Math.max(info.start - paid, 0) : 0;
+    if (has) { totalLeft += left; tracked++; }
+    const el = document.createElement("div"); el.className = "card";
+    el.innerHTML = `<div class="top"><b class="nm"></b><span class="big num">${has ? fmt(left) : "—"}</span></div>
+      <div class="bar"><i style="background:var(--e-cards);width:${has && info.start > 0 ? Math.min(paid / info.start, 1) * 100 : 0}%"></i></div>
+      <div class="hint num"></div>
+      <div class="inputs">
+        <label>Balance on statement<span class="small-money">$<input type="number" inputmode="decimal" min="0" step="0.01" id="bal_${b.id}"></span></label>
+        <label>Extra payment<span class="small-money">$<input type="number" inputmode="decimal" min="0" step="0.01" id="ext_${b.id}" placeholder="0.00"></span></label>
+      </div>`;
+    el.querySelector(".nm").textContent = b.name;
+    const months = mine(b) > 0 ? Math.ceil(left / mine(b)) : 0;
+    el.querySelector(".hint").textContent = !has ? `Type the balance from your last ${b.name} statement to start tracking.`
+      : left <= 0 ? "Paid off. Nice work."
+      : `${fmt(paid)} paid since ${label(new Date(info.asOf + "T00:00:00"))}. At ${fmt(mine(b))} a month, about ${months} more month${months === 1 ? "" : "s"}, not counting interest.`;
+    const bal = el.querySelector("#bal_" + b.id), ext = el.querySelector("#ext_" + b.id);
+    if (has) bal.value = info.start;
+    bal.addEventListener("change", () => {
+      const v = bal.value === "" ? undefined : Math.max(parseFloat(bal.value) || 0, 0);
+      if (v === undefined) delete balances[b.id]; else balances[b.id] = { start: v, asOf: key(today), extras: [] };
+      store.set("balances", balances); bal.blur(); render();
+    });
+    ext.addEventListener("change", () => {
+      const v = Math.max(parseFloat(ext.value) || 0, 0);
+      if (v > 0 && has) { info.extras = (info.extras || []).concat([{ amt: v, date: key(today) }]); balances[b.id] = info; store.set("balances", balances); }
+      ext.value = ""; ext.blur(); render();
+    });
+    box.appendChild(el);
+  });
+  if (!BILLS.some(isCard)) {
+    const e = document.createElement("div"); e.className = "note";
+    e.innerHTML = 'No cards yet. Add a bill and tick "It\'s a credit card or loan" to track its balance here. <button type="button" class="secondary" id="addcardbtn" style="display:block;margin-top:10px">Add a card</button>';
+    box.appendChild(e);
+    $("addcardbtn").addEventListener("click", () => {
+      folds.bills = false; store.set("folds", folds); editing = true; armed = null; render();
+      $("a_kind").value = "due"; $("a_daywrap").hidden = false; $("a_card").checked = true;
+      $("addform").scrollIntoView({ block: "center" }); $("a_name").placeholder = "e.g. Discover"; $("a_name").focus();
+    });
+  }
+  $("sub_cards").textContent = tracked ? `${fmt(totalLeft)} owed across ${tracked} card${tracked === 1 ? "" : "s"}` : BILLS.some(isCard) ? "Add your balances to track payoff" : "No cards added yet";
+}
+
+function renderCosts() {
+  const ul = $("costlist"); ul.innerHTML = "";
+  costs.forEach(c => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="small-money"><input type="text" aria-label="Cost name"></span><span class="small-money">$<input type="number" inputmode="decimal" min="0" step="0.01" aria-label="Amount"></span><button type="button" class="xbtn" aria-label="Remove">×</button>`;
+    const [nm, am] = li.querySelectorAll("input");
+    nm.value = c.name; am.value = c.amt || "";
+    am.placeholder = "0.00";
+    nm.addEventListener("change", () => { c.name = nm.value; store.set("costs", costs); });
+    am.addEventListener("input", () => { c.amt = Math.max(parseFloat(am.value) || 0, 0); store.set("costs", costs); render(); });
+    li.querySelector("button").addEventListener("click", () => { costs = costs.filter(x => x !== c); store.set("costs", costs); renderCosts(); render(); });
+    ul.appendChild(li);
+  });
+}
+
+function fieldFor(k, idp) {
+  const [, lab, sub, unit] = SFIELDS.find(f => f[0] === k);
+  const id = idp + k;
+  const l = document.createElement("label"); l.htmlFor = id;
+  l.textContent = lab; if (sub) { const s2 = document.createElement("span"); s2.className = "sub"; s2.textContent = sub; l.appendChild(s2); }
+  const w = document.createElement("div"); w.className = "small-money";
+  const reload = () => { store.set("settings4", S); location.reload(); };
+  if (unit === "freq") {
+    w.innerHTML = `<select id="${id}">${Object.entries(FREQS).map(([v, f]) => `<option value="${v}">${f[0]}</option>`).join("")}</select>`;
+    const el = w.querySelector("select"); el.value = S.freq;
+    el.addEventListener("change", () => { S.freq = el.value; if (idp === "s_") reload(); else store.set("settings4", S); });
+  } else if (unit === "date") {
+    w.innerHTML = `<input id="${id}" type="date">`;
+    const el = w.querySelector("input"); el.value = S.first || "";
+    el.addEventListener("change", () => { S.first = el.value; if (idp === "s_") reload(); else store.set("settings4", S); });
+  } else if (unit === "text") {
+    w.innerHTML = `<input id="${id}" type="text">`;
+    const el = w.querySelector("input"); el.value = S.name || "";
+    el.addEventListener("change", () => { S.name = el.value.trim(); store.set("settings4", S); renderTitle(); });
   } else {
-    numEl.textContent = 'In session';
-    labelEl.textContent = 'fall semester underway';
+    w.innerHTML = unit === "%" || unit === "hrs" ? `<input id="${id}" type="number" inputmode="decimal" min="0" step="any"><span>${unit}</span>`
+                                                 : `<span>$</span><input id="${id}" type="number" inputmode="decimal" min="0" step="0.01">`;
+    const inp = w.querySelector("input"); inp.value = S[k] || (k === "rate" || k === "hours" ? "" : S[k]);
+    inp.addEventListener("input", () => { let v = Math.max(parseFloat(inp.value) || 0, 0); if (unit === "%") v = Math.min(v, 100); S[k] = v; store.set("settings4", S); if (idp === "s_") render(); });
+  }
+  return [l, w];
+}
+function renderTitle() {
+  $("title").textContent = S.name ? S.name + "'s Payday" : "Payday";
+  document.title = S.name ? S.name + "'s Payday" : "Payday Splitter";
+}
+
+// Backup and restore. A "payday-backup" file replaces everything saved here.
+// A "payday-setup" file only fills in things that haven't been saved yet.
+function allSaved() {
+  const out = {};
+  try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith(PREFIX)) out[k.slice(PREFIX.length)] = JSON.parse(localStorage.getItem(k)); } } catch (e) {}
+  return out;
+}
+function importMsg(text, bad) { const m = $("importmsg"); m.hidden = false; m.className = bad ? "alert" : "ok"; m.textContent = text; }
+let pendingRestore = null;
+function applyImport(obj) {
+  if (obj.type === "payday-setup") {
+    let n = 0;
+    Object.entries(obj.data || {}).forEach(([k, v]) => {
+      const cur = store.get(k, undefined);
+      const plain = x => x && typeof x === "object" && !Array.isArray(x);
+      if (cur === undefined) { store.set(k, v); n++; }
+      else if (plain(cur) && plain(v)) { store.set(k, Object.assign({}, v, cur)); n++; }
+    });
+    importMsg(`Setup file added (${n} item${n === 1 ? "" : "s"}). Nothing you'd already entered was changed. Reloading…`);
+    setTimeout(() => location.reload(), 900);
+  } else {
+    try { Object.keys(allSaved()).forEach(k => localStorage.removeItem(PREFIX + k)); } catch (e) {}
+    Object.entries(obj.data || {}).forEach(([k, v]) => store.set(k, v));
+    importMsg("Backup restored. Reloading…");
+    setTimeout(() => location.reload(), 900);
   }
 }
-updateCountdown();
+
+function buildSetup() {
+  if (!needsSetup()) return;
+  $("setup").hidden = false;
+  const g = $("setupgrid");
+  SETUP_FIELDS.forEach(k => g.append(...fieldFor(k, "u_")));
+  $("setupdone").addEventListener("click", () => {
+    if (!(S.rate > 0) || !S.first) { $("setupdone").textContent = "Add your hourly pay and a payday first"; return; }
+    store.set("settings4", S); location.reload();
+  });
+}
+function buildSettings() {
+  const g = $("settings");
+  SFIELDS.forEach(([k]) => g.append(...fieldFor(k, "s_")));
+}
+
+$("a_kind").addEventListener("change", () => { $("a_daywrap").hidden = $("a_kind").value !== "due"; });
+$("addform").addEventListener("submit", e => {
+  e.preventDefault();
+  const name = $("a_name").value.trim(), amt = Math.max(parseFloat($("a_amt").value) || 0, 0);
+  if (!name) return;
+  const b = { id: "c" + Date.now(), name, amt, kind: $("a_kind").value, share: Number($("a_share").value), card: $("a_card").checked };
+  if (b.kind === "due") b.day = Math.min(Math.max(Math.round(parseFloat($("a_day").value)) || 1, 1), 31);
+  const fi = BILLS.findIndex(x => x.kind === "check");
+  if (fi >= 0) BILLS.splice(fi, 0, b); else BILLS.push(b);
+  store.set("bills4", BILLS);
+  $("a_name").value = ""; $("a_amt").value = ""; $("a_share").value = "100"; $("a_card").checked = false;
+  render();
+});
+const setSplit = v => { splits[sel] = Math.min(Math.max(Math.round(v), 0), 100); store.set("splits", splits); render(); };
+$("split").addEventListener("input", () => setSplit(parseFloat($("split").value)));
+document.querySelectorAll("#quick button").forEach(b => b.addEventListener("click", () => setSplit(Number(b.dataset.p))));
+["check", "bills", "cards"].forEach(id => $("fold_" + id).addEventListener("click", () => { folds[id] = !folds[id]; store.set("folds", folds); applyFolds(); }));
+$("hours").addEventListener("input", () => { hrs[sel] = $("hours").value; store.set("hours", hrs); render(); });
+$("useest").addEventListener("click", () => { delete pays[sel]; store.set("pays", pays); render(); });
+$("exportbtn").addEventListener("click", () => {
+  const data = JSON.stringify({ type: "payday-backup", saved: key(new Date()), data: allSaved() }, null, 2);
+  const name = `payday-backup-${(S.name || "me").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${key(new Date())}.json`;
+  try {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([data], { type: "application/json" }));
+    a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    importMsg(`Saved ${name} to your Downloads folder. Keep it somewhere safe.`);
+  } catch (e) { importMsg("Couldn't download the backup in this browser.", true); }
+});
+$("importfile").addEventListener("change", () => {
+  const f = $("importfile").files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    let obj; try { obj = JSON.parse(r.result); } catch (e) { importMsg("That file isn't a Payday backup.", true); return; }
+    if (!obj || (obj.type !== "payday-backup" && obj.type !== "payday-setup")) { importMsg("That file isn't a Payday backup.", true); return; }
+    if (obj.type === "payday-backup" && Object.keys(allSaved()).length) {
+      pendingRestore = obj;
+      const m = $("importmsg"); m.hidden = false; m.className = "alert";
+      m.innerHTML = 'Restoring replaces everything saved in this browser. <button type="button" class="secondary" id="confirmrestore" style="margin-top:8px;display:block">Yes, replace it</button>';
+      $("confirmrestore").addEventListener("click", () => applyImport(pendingRestore));
+    } else applyImport(obj);
+    $("importfile").value = "";
+  };
+  r.readAsText(f);
+});
+$("spendform").addEventListener("submit", e => {
+  e.preventDefault();
+  const amt = Math.max(parseFloat($("sp_amt").value) || 0, 0);
+  if (!amt) return;
+  (spends[sel] = spends[sel] || []).push({ what: $("sp_what").value.trim(), amt, date: label(new Date()) });
+  store.set("spends", spends);
+  $("sp_what").value = ""; $("sp_amt").value = "";
+  render();
+});
+$("addcost").addEventListener("click", () => { costs.push({ id: "c" + Date.now(), name: "New cost", amt: 0 }); store.set("costs", costs); renderCosts(); render();
+  const ins = $("costlist").querySelectorAll('input[type="text"]'); if (ins.length) { ins[ins.length - 1].select(); } });
+$("usecosts").addEventListener("change", () => { useCosts = $("usecosts").checked; store.set("useCosts", useCosts); render(); });
+$("editbtn").addEventListener("click", () => { editing = !editing; armed = null; renderBills(); });
+$("saved").value = store.get("saved", 0);
+$("pay").addEventListener("input", () => { pays[sel] = $("pay").value; store.set("pays", pays); render(); });
+$("saved").addEventListener("input", () => { store.set("saved", $("saved").value); render(); });
+renderTitle();
+buildSetup();
+buildSettings();
+renderCosts();
+render();
 </script>
 </body>
 </html>
